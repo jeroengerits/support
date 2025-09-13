@@ -1,7 +1,7 @@
 {
   "name": "jeroengerits/support",
   "version": "0.0.1",
-  "description": "A PHP library with support classes for various projects.",
+  "description": "A PHP library with support classes for various projects",
   "type": "library",
   "keywords": [
     "support",
@@ -40,11 +40,7 @@
       "helpers.php"
     ]
   },
-  "autoload-dev": {
-    "psr-4": {
-      "JeroenGerits\\Support\\Tests\\": "tests/"
-    }
-  },
+  
   "config": {
     "allow-plugins": {
       "pestphp/pest-plugin": true
