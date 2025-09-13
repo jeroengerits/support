@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\ValueObjects;
+namespace JeroenGerits\Support\ValueObject;
 
-use JeroenGerits\Support\Contracts\ValueObject;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
+use JeroenGerits\Support\Contract\ValueObject;
+use JeroenGerits\Support\Exception\InvalidLongitudeException;
 
 final readonly class Longitude implements ValueObject
 {

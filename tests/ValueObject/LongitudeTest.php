@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
-use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
+use JeroenGerits\Support\Exception\InvalidLongitudeException;
+use JeroenGerits\Support\ValueObject\Longitude;
 
 it('creates a valid longitude', function (): void {
     $longitude = new Longitude(-74.0060);

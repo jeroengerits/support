@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
-use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
-use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
+use JeroenGerits\Support\Enum\DistanceUnit;
+use JeroenGerits\Support\Exception\InvalidCoordinatesException;
+use JeroenGerits\Support\ValueObject\Coordinates;
+use JeroenGerits\Support\ValueObject\Latitude;
+use JeroenGerits\Support\ValueObject\Longitude;
 
 it('creates coordinates with latitude and longitude', function (): void {
     $latitude = new Latitude(40.7128);

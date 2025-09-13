@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\ValueObjects;
+namespace JeroenGerits\Support\ValueObject;
 
-use JeroenGerits\Support\Contracts\ValueObject;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
+use JeroenGerits\Support\Contract\ValueObject;
+use JeroenGerits\Support\Exception\InvalidLatitudeException;
 
 final readonly class Latitude implements ValueObject
 {

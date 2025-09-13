@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Contracts\ValueObject;
+use JeroenGerits\Support\Contract\ValueObject;
 
 /**
  * Test implementation of ValueObject for testing purposes.

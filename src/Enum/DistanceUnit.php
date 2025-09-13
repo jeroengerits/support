@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\Enums;
+namespace JeroenGerits\Support\Enum;
 
 /**
  * Enumeration of supported distance units for coordinate calculations.

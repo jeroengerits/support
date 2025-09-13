@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\ValueObjects;
+namespace JeroenGerits\Support\ValueObject;
 
-use JeroenGerits\Support\Contracts\ValueObject;
-use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
+use JeroenGerits\Support\Contract\ValueObject;
+use JeroenGerits\Support\Enum\DistanceUnit;
+use JeroenGerits\Support\Exception\InvalidCoordinatesException;
+use JeroenGerits\Support\Exception\InvalidLatitudeException;
+use JeroenGerits\Support\Exception\InvalidLongitudeException;
 
 final readonly class Coordinates implements ValueObject
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Enum\DistanceUnit;
 
 it('has all expected enum cases', function (): void {
     $cases = DistanceUnit::cases();

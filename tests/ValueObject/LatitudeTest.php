@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
+use JeroenGerits\Support\Exception\InvalidLatitudeException;
+use JeroenGerits\Support\ValueObject\Latitude;
 
 it('creates a valid latitude', function (): void {
     $latitude = new Latitude(40.7128);
