@@ -5,10 +5,19 @@ A PHP support package with various classes and helpers for my personal projects.
 ## Table of Contents
 
 - [Contracts](#contracts)
+  - [ValueObject](#valueobject)
 - [Enums](#enums)
+  - [DistanceUnit](#distanceunit)
 - [Exceptions](#exceptions)
+  - [InvalidCoordinatesException](#invalidcoordinateexception)
+  - [InvalidLatitudeException](#invalidlatitudeexception)
+  - [InvalidLongitudeException](#invalidlongitudeexception)
 - [Helpers](#helpers)
+  - [dd()](#dd)
 - [Value Objects](#value-objects)
+  - [Coordinates](#coordinates)
+  - [Latitude](#latitude)
+  - [Longitude](#longitude)
 - [Testing](#testing)
 - [License](#license)
 
