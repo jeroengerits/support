@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Domain\Coordinates\Exceptions\InvalidCoordinatesException;
-use JeroenGerits\Support\Domain\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Domain\Coordinates\Exceptions\InvalidLongitudeException;
-use JeroenGerits\Support\Domain\Coordinates\Factories\CreateCoordinates;
-use JeroenGerits\Support\Domain\Coordinates\ValueObjects\Coordinates;
+use JeroenGerits\Support\Coordinates\CoordinatesFactory;
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 
 if (! function_exists('coordinates')) {
     /**
-     * @throws InvalidLongitudeException
-     * @throws InvalidCoordinatesException
-     * @throws InvalidLatitudeException
+     * Create a new Coordinates instance from latitude and longitude values.
+     *
+     * @param float|string|array|int $latitude  The latitude value
+     * @param float|int|string|null  $longitude The longitude value (optional)
      */
     function coordinates(float|string|array|int $latitude, float|int|string|null $longitude = null): Coordinates
     {
-        return CreateCoordinates::from($latitude, $longitude);
+        return CoordinatesFactory::createCoordinates($latitude, $longitude);
     }
 }
