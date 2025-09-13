@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 /*
 |--------------------------------------------------------------------------
-| Test Suite Configuration
+| Pest Test Configuration
 |--------------------------------------------------------------------------
 |
-| Here you may define how you want Pest to handle your test suite.
+| This file configures Pest PHP for the support package tests.
+| It sets up global test helpers, custom matchers, and shared fixtures.
 |
 */
 
-uses()->in('../src');
+uses()->in(__DIR__.'/../src');

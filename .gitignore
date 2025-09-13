@@ -1,3 +1,4 @@
 /vendor/
 /.rector-cache/
 /.idea/
+/logs/
