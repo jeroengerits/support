@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Exception;
 
-use InvalidArgumentException;
-
 /**
  * Exception thrown when an invalid latitude value is provided.
  *
  * @since 0.0.1
  */
-final class InvalidLatitudeException extends InvalidArgumentException
+final class InvalidLatitudeException extends SupportException
 {
     /**
      * Create an exception for latitude values outside the valid range.

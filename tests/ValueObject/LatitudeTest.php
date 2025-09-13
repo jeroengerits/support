@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Exception\InvalidLatitudeException;
+use JeroenGerits\Support\Exception\SupportException;
 use JeroenGerits\Support\ValueObject\Latitude;
 
 it('creates a valid latitude', function (): void {
@@ -251,6 +252,6 @@ it('throws invalidString exception with correct message', function (string $inva
     ' ',
 ]);
 
-it('ensures exception extends InvalidArgumentException', function (): void {
-    expect(new InvalidLatitudeException('test'))->toBeInstanceOf(InvalidArgumentException::class);
+it('ensures exception extends SupportException', function (): void {
+    expect(new InvalidLatitudeException('test'))->toBeInstanceOf(SupportException::class);
 });

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Exception;
 
-use InvalidArgumentException;
-
 /**
  * Exception thrown when invalid coordinates are provided.
  *
  * @since 0.0.1
  */
-final class InvalidCoordinatesException extends InvalidArgumentException
+final class InvalidCoordinatesException extends SupportException
 {
     /**
      * Create an exception for missing array keys.

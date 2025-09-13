@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Exception;
 
-use InvalidArgumentException;
-
 /**
  * Exception thrown when an invalid longitude value is provided.
  *
  * @since 0.0.1
  */
-final class InvalidLongitudeException extends InvalidArgumentException
+final class InvalidLongitudeException extends SupportException
 {
     /**
      * Create an exception for longitude values outside the valid range.

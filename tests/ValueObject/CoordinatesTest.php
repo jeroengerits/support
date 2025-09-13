@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use JeroenGerits\Support\Enum\DistanceUnit;
 use JeroenGerits\Support\Exception\InvalidCoordinatesException;
+use JeroenGerits\Support\Exception\InvalidLatitudeException;
+use JeroenGerits\Support\Exception\InvalidLongitudeException;
+use JeroenGerits\Support\Exception\SupportException;
 use JeroenGerits\Support\ValueObject\Coordinates;
 use JeroenGerits\Support\ValueObject\Latitude;
 use JeroenGerits\Support\ValueObject\Longitude;
@@ -36,12 +39,12 @@ it('creates coordinates from array', function (): void {
 
 it('throws exception when creating from array with missing latitude', function (): void {
     expect(fn (): Coordinates => Coordinates::fromArray(['longitude' => -74.0060]))
-        ->toThrow(InvalidArgumentException::class, 'Array must contain both latitude and longitude keys');
+        ->toThrow(InvalidCoordinatesException::class, 'Array must contain both latitude and longitude keys');
 });
 
 it('throws exception when creating from array with missing longitude', function (): void {
     expect(fn (): Coordinates => Coordinates::fromArray(['latitude' => 40.7128]))
-        ->toThrow(InvalidArgumentException::class, 'Array must contain both latitude and longitude keys');
+        ->toThrow(InvalidCoordinatesException::class, 'Array must contain both latitude and longitude keys');
 });
 
 it('creates coordinates from string', function (): void {
@@ -60,17 +63,17 @@ it('creates coordinates from string with space after comma', function (): void {
 
 it('throws exception when creating from invalid string format', function (): void {
     expect(fn (): Coordinates => Coordinates::fromString('40.7128'))
-        ->toThrow(InvalidArgumentException::class, 'Invalid coordinates format. Expected "latitude,longitude"');
+        ->toThrow(InvalidCoordinatesException::class, 'Invalid coordinates format. Expected "latitude,longitude"');
 });
 
 it('throws exception when creating from string with invalid latitude', function (): void {
     expect(fn (): Coordinates => Coordinates::fromString('91.0,-74.0060'))
-        ->toThrow(InvalidArgumentException::class, 'Latitude must be between -90 and 90 degrees');
+        ->toThrow(InvalidLatitudeException::class, 'Latitude must be between -90 and 90 degrees');
 });
 
 it('throws exception when creating from string with invalid longitude', function (): void {
     expect(fn (): Coordinates => Coordinates::fromString('40.7128,181.0'))
-        ->toThrow(InvalidArgumentException::class, 'Longitude must be between -180 and 180 degrees');
+        ->toThrow(InvalidLongitudeException::class, 'Longitude must be between -180 and 180 degrees');
 });
 
 it('is equal to another coordinates with same values', function (): void {
@@ -310,6 +313,6 @@ it('throws invalidStringFormat exception with correct message', function (string
     ' ',
 ]);
 
-it('ensures exception extends InvalidArgumentException', function (): void {
-    expect(new InvalidCoordinatesException('test'))->toBeInstanceOf(InvalidArgumentException::class);
+it('ensures exception extends SupportException', function (): void {
+    expect(new InvalidCoordinatesException('test'))->toBeInstanceOf(SupportException::class);
 });
