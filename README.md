@@ -179,42 +179,6 @@ Thrown when latitude values are outside the valid range (-90 to 90 degrees).
 
 Thrown when longitude values are outside the valid range (-180 to 180 degrees).
 
-### Examples
-
-#### Distance Between Cities
-
-```php
-use JeroenGerits\Support\Enum\DistanceUnit;use JeroenGerits\Support\ValueObject\Coordinates;
-
-$newYork = Coordinates::fromFloats(40.7128, -74.0060);
-$london = Coordinates::fromFloats(51.5074, -0.1278);
-$tokyo = Coordinates::fromFloats(35.6762, 139.6503);
-
-$nyToLondon = $newYork->distanceTo($london); // ~5570 km
-$nyToTokyo = $newYork->distanceTo($tokyo, DistanceUnit::MILES); // ~6755 miles
-```
-
-#### Coordinate Validation
-
-```php
-try {
-    $coordinates = Coordinates::fromString('40.7128,-74.0060');
-    echo "Valid coordinates: " . $coordinates;
-} catch (InvalidCoordinatesException $e) {
-    echo "Invalid coordinates: " . $e->getMessage();
-}
-```
-
-#### Hemisphere Detection
-
-```php
-$coordinates = Coordinates::fromFloats(40.7128, -74.0060); // New York
-
-if ($coordinates->isNorthern() && $coordinates->isWestern()) {
-    echo "Located in the Northwestern hemisphere";
-}
-```
-
 ## Testing
 
 ```bash
