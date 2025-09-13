@@ -23,7 +23,6 @@ final readonly class TestValueObject implements ValueObject
         return ['value' => $this->value];
     }
 
-
     public function __toString(): string
     {
         if (is_object($this->value)) {
@@ -36,7 +35,7 @@ final readonly class TestValueObject implements ValueObject
 
 it('defines the required methods', function (): void {
     $reflection = new ReflectionClass(ValueObject::class);
-    
+
     expect($reflection->isInterface())->toBeTrue()
         ->and($reflection->hasMethod('equals'))->toBeTrue()
         ->and($reflection->hasMethod('toArray'))->toBeTrue();
@@ -51,7 +50,7 @@ it('extends Stringable interface', function (): void {
 
 it('can be implemented by a concrete class', function (): void {
     $valueObject = new TestValueObject('test');
-    
+
     expect($valueObject)->toBeInstanceOf(ValueObject::class)
         ->and($valueObject->toArray())->toBe(['value' => 'test'])
         ->and((string) $valueObject)->toBe('test');
@@ -69,7 +68,7 @@ it('supports equality comparison', function (): void {
 it('supports different value types', function (mixed $value): void {
     $valueObject = new TestValueObject($value);
     $expectedString = is_object($value) ? get_class($value) : (string) $value;
-    
+
     expect($valueObject->toArray())->toBe(['value' => $value])
         ->and((string) $valueObject)->toBe($expectedString);
 })->with([
