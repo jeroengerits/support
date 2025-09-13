@@ -5,19 +5,22 @@ A PHP support package with various classes and helpers for my personal projects.
 ## Table of Contents
 
 - [Contracts](#contracts)
-  - [ValueObject](#valueobject)
+    - [ValueObject](#valueobject)
 - [Enums](#enums)
-  - [DistanceUnit](#distanceunit)
+    - [DistanceUnit](#distanceunit)
 - [Exceptions](#exceptions)
-  - [InvalidCoordinatesException](#invalidcoordinateexception)
-  - [InvalidLatitudeException](#invalidlatitudeexception)
-  - [InvalidLongitudeException](#invalidlongitudeexception)
+    - [InvalidCoordinatesException](#invalidcoordinateexception)
+    - [InvalidLatitudeException](#invalidlatitudeexception)
+    - [InvalidLongitudeException](#invalidlongitudeexception)
 - [Helpers](#helpers)
-  - [dd()](#dd)
+    - [coordinates()](#coordinates)
+    - [dd()](#dd)
+    - [latitude()](#latitude)
+    - [longitude()](#longitude)
 - [Value Objects](#value-objects)
-  - [Coordinates](#coordinates)
-  - [Latitude](#latitude)
-  - [Longitude](#longitude)
+    - [Coordinates](#coordinates)
+    - [Latitude](#latitude)
+    - [Longitude](#longitude)
 - [Testing](#testing)
 - [License](#license)
 
@@ -94,6 +97,29 @@ Thrown when longitude values are outside the valid range (-180 to 180 degrees).
 
 ## Helpers
 
+### `coordinates()`
+
+Create a Coordinates instance from various input types.
+
+```php
+// From two floats
+$coords = coordinates(40.7128, -74.0060);
+
+// From two integers
+$coords = coordinates(40, -74);
+
+// From array
+$coords = coordinates(['latitude' => 40.7128, 'longitude' => -74.0060]);
+
+// From string (comma-separated)
+$coords = coordinates('40.7128,-74.0060');
+
+// Mixed types
+$coords = coordinates('40.7128', -74.0060); // string latitude, float longitude
+$coords = coordinates(40.7128, '-74.0060'); // float latitude, string longitude
+$coords = coordinates('40.7128', '-74.0060'); // both strings
+```
+
 ### `dd()`
 
 A simple dump and die helper function for debugging.
@@ -101,6 +127,42 @@ A simple dump and die helper function for debugging.
 ```php
 dd($variable); // Dumps variable and exits
 dd($var1, $var2, $var3); // Dumps multiple variables
+```
+
+### `latitude()`
+
+Create a Latitude instance from various input types.
+
+```php
+// From float
+$lat = latitude(40.7128);
+
+// From string
+$lat = latitude('40.7128');
+
+// From array with latitude key
+$lat = latitude(['latitude' => 40.7128]);
+
+// From array with numeric index
+$lat = latitude([40.7128]);
+```
+
+### `longitude()`
+
+Create a Longitude instance from various input types.
+
+```php
+// From float
+$lng = longitude(-74.0060);
+
+// From string
+$lng = longitude('-74.0060');
+
+// From array with longitude key
+$lng = longitude(['longitude' => -74.0060]);
+
+// From array with numeric index
+$lng = longitude([-74.0060]);
 ```
 
 ## Value Objects

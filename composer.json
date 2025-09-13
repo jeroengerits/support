@@ -37,7 +37,11 @@
       "JeroenGerits\\Support\\": "src/"
     },
     "files": [
-      "helpers.php"
+      "helpers.php",
+      "src/Helper/dd.php",
+      "src/Helper/latitude.php",
+      "src/Helper/longitude.php",
+      "src/Helper/coordinates.php"
     ]
   },
   "config": {
