@@ -2,6 +2,16 @@
 
 A PHP support package with various classes and helpers for my personal projects.
 
+## Table of Contents
+
+- [Contracts](#contracts)
+- [Enums](#enums)
+- [Exceptions](#exceptions)
+- [Helpers](#helpers)
+- [Value Objects](#value-objects)
+- [Testing](#testing)
+- [License](#license)
+
 ## Contracts
 
 ### `ValueObject`
@@ -29,6 +39,49 @@ class MyValueObject implements ValueObject
     }
 }
 ```
+
+## Enums
+
+### `DistanceUnit`
+
+An enum for distance units used in coordinate calculations.
+
+```php
+use JeroenGerits\Support\Enum\DistanceUnit;
+
+// Available units
+DistanceUnit::KILOMETERS;     // 'km'
+DistanceUnit::MILES;          // 'mi'
+DistanceUnit::NAUTICAL_MILES; // 'nmi'
+DistanceUnit::METERS;         // 'm'
+DistanceUnit::MILLIMETERS;    // 'mm'
+DistanceUnit::CENTIMETERS;    // 'cm'
+DistanceUnit::DECIMETERS;     // 'dm'
+DistanceUnit::INCHES;         // 'in'
+DistanceUnit::FEET;           // 'ft'
+DistanceUnit::YARDS;          // 'yd'
+DistanceUnit::LIGHT_YEARS;    // 'ly'
+
+// Methods
+$unit = DistanceUnit::MILES;
+$factor = $unit->getConversionFactor(); // 0.621371 (km to miles)
+$name = $unit->getDisplayName();        // "miles"
+$abbr = $unit->getAbbreviation();       // "mi"
+```
+
+## Exceptions
+
+### `InvalidCoordinatesException`
+
+Thrown when invalid coordinate data is provided (missing keys, invalid format).
+
+### `InvalidLatitudeException`
+
+Thrown when latitude values are outside the valid range (-90 to 90 degrees).
+
+### `InvalidLongitudeException`
+
+Thrown when longitude values are outside the valid range (-180 to 180 degrees).
 
 ## Helpers
 
@@ -135,49 +188,6 @@ $array = $longitude->toArray(); // ['longitude' => -74.0060]
 // Validation
 new Longitude(181.0); // Throws InvalidLongitudeException
 ```
-
-## Enums
-
-### `DistanceUnit`
-
-An enum for distance units used in coordinate calculations.
-
-```php
-use JeroenGerits\Support\Enum\DistanceUnit;
-
-// Available units
-DistanceUnit::KILOMETERS;     // 'km'
-DistanceUnit::MILES;          // 'mi'
-DistanceUnit::NAUTICAL_MILES; // 'nmi'
-DistanceUnit::METERS;         // 'm'
-DistanceUnit::MILLIMETERS;    // 'mm'
-DistanceUnit::CENTIMETERS;    // 'cm'
-DistanceUnit::DECIMETERS;     // 'dm'
-DistanceUnit::INCHES;         // 'in'
-DistanceUnit::FEET;           // 'ft'
-DistanceUnit::YARDS;          // 'yd'
-DistanceUnit::LIGHT_YEARS;    // 'ly'
-
-// Methods
-$unit = DistanceUnit::MILES;
-$factor = $unit->getConversionFactor(); // 0.621371 (km to miles)
-$name = $unit->getDisplayName();        // "miles"
-$abbr = $unit->getAbbreviation();       // "mi"
-```
-
-## Exceptions
-
-### `InvalidCoordinatesException`
-
-Thrown when invalid coordinate data is provided (missing keys, invalid format).
-
-### `InvalidLatitudeException`
-
-Thrown when latitude values are outside the valid range (-90 to 90 degrees).
-
-### `InvalidLongitudeException`
-
-Thrown when longitude values are outside the valid range (-180 to 180 degrees).
 
 ## Testing
 
