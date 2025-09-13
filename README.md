@@ -8,10 +8,6 @@ A PHP support package with various classes and helpers for my personal projects.
     - [ValueObject](#valueobject)
 - [Enums](#enums)
     - [DistanceUnit](#distanceunit)
-- [Exceptions](#exceptions)
-    - [InvalidCoordinatesException](#invalidcoordinateexception)
-    - [InvalidLatitudeException](#invalidlatitudeexception)
-    - [InvalidLongitudeException](#invalidlongitudeexception)
 - [Helpers](#helpers)
     - [coordinates](#coordinates)
     - [dd](#dd)
@@ -21,8 +17,6 @@ A PHP support package with various classes and helpers for my personal projects.
     - [Coordinates](#coordinates)
     - [Latitude](#latitude)
     - [Longitude](#longitude)
-- [Testing](#testing)
-- [License](#license)
 
 ## Contracts
 
@@ -259,13 +253,3 @@ $array = $longitude->toArray(); // ['longitude' => -74.0060]
 // Validation
 new Longitude(181.0); // Throws InvalidLongitudeException
 ```
-
-## Testing
-
-```bash
-composer test
-```
-
-## License
-
-MIT License
