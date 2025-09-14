@@ -5,9 +5,10 @@ Clean, PSR-16 compliant caching solution with TTL support and comprehensive stat
 ## Features
 
 - **PSR-16 Compliant**: Standard cache interface
-- **TTL Support**: Automatic expiration with configurable time-to-live
+- **TTL Support**: Automatic expiration with configurable time-to-live and accurate DateInterval handling
 - **Statistics**: Built-in performance monitoring
 - **Memory Management**: LRU eviction prevents memory leaks
+- **Optimized Performance**: Efficient `has()` method and proper DateTime calculations
 - **Testable**: Dependency injection for easy mocking
 
 ## Quick Start
@@ -60,6 +61,7 @@ echo $stats; // "Cache Stats: 150 hits, 25 misses, 85.7% hit ratio, 175/1000 ite
 
 ```php
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
+use DateInterval;
 
 // Different TTL formats
 $ttl = TimeToLive::fromSeconds(60);
@@ -70,6 +72,10 @@ $ttl = TimeToLive::default(); // 1 hour
 
 // Use in cache operations
 $cache->set('key', 'value', $ttl->seconds);
+
+// Support for DateInterval (accurate calculations)
+$interval = new DateInterval('PT2H30M'); // 2 hours 30 minutes
+$cache->set('key', 'value', $interval);
 ```
 
 ## Testing
@@ -110,6 +116,11 @@ $cache = CacheFactory::createArrayCache(
     maxItems: 1000
 );
 ```
+
+**Performance Features:**
+- Optimized `has()` method for efficient existence checks
+- Accurate DateInterval to timestamp conversion using DateTime
+- Efficient memory management with LRU eviction
 
 ### NullCacheAdapter
 

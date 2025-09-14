@@ -9,7 +9,7 @@ use Exception;
 /**
  * Base exception class for coordinate-related errors.
  */
-abstract class BaseCoordinatesException extends Exception
+abstract class CoordinatesException extends Exception
 {
     /** Error code for invalid coordinate values. */
     public const int CODE_INVALID_VALUE = 1001;

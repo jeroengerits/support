@@ -110,7 +110,7 @@ class TimeToLive implements Equatable, Stringable
     private function validate(): void
     {
         if ($this->seconds < 0) {
-            throw new InvalidTimeToLiveException('TTL cannot be negative');
+            throw InvalidTimeToLiveException::negativeValue($this->seconds);
         }
     }
 }

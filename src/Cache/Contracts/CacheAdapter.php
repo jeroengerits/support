@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Cache\Contracts;
 
-interface CacheAdapter extends \Psr\SimpleCache\CacheInterface
+use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
+use Psr\SimpleCache\CacheInterface;
+
+interface CacheAdapter extends CacheInterface
 {
     /**
      * Get cache statistics.
      *
-     * @return \JeroenGerits\Support\Cache\ValueObjects\CacheStats Current cache statistics
+     * @return CacheStats Current cache statistics
      */
-    public function getStats(): \JeroenGerits\Support\Cache\ValueObjects\CacheStats;
+    public function getStats(): CacheStats;
 
     /**
      * Get the cache namespace/prefix.

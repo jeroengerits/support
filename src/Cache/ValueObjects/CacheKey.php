@@ -65,19 +65,19 @@ class CacheKey implements Equatable, Stringable
     private function validate(): void
     {
         if ($this->key === '' || $this->key === '0') {
-            throw new InvalidCacheKeyException('Cache key cannot be empty');
+            throw InvalidCacheKeyException::emptyKey();
         }
 
         if (str_contains($this->key, ':')) {
-            throw new InvalidCacheKeyException('Cache key cannot contain colons');
+            throw InvalidCacheKeyException::invalidCharacters($this->key, ':');
         }
 
         if ($this->namespace === '' || $this->namespace === '0') {
-            throw new InvalidCacheKeyException('Cache namespace cannot be empty');
+            throw InvalidCacheKeyException::emptyKey();
         }
 
         if (str_contains($this->namespace, ':')) {
-            throw new InvalidCacheKeyException('Cache namespace cannot contain colons');
+            throw InvalidCacheKeyException::invalidCharacters($this->namespace, ':');
         }
     }
 }

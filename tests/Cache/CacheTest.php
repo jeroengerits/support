@@ -31,6 +31,36 @@ describe('Cache Package', function (): void {
             expect($cache->get('key1'))->toBeNull();
         });
 
+        it('supports TTL with DateInterval', function (): void {
+            $cache = CacheFactory::createArrayCache('test', 10);
+
+            // Test with DateInterval - should use accurate DateTime calculations
+            $interval = new DateInterval('PT1S'); // 1 second
+            $cache->set('key1', 'value1', $interval);
+            expect($cache->get('key1'))->toBe('value1');
+
+            // Wait for expiration
+            sleep(2);
+            expect($cache->get('key1'))->toBeNull();
+        });
+
+        it('has() method is optimized and does not use get() internally', function (): void {
+            $cache = CacheFactory::createArrayCache('test', 10);
+
+            $cache->set('key1', 'value1');
+            expect($cache->has('key1'))->toBeTrue();
+
+            $cache->delete('key1');
+            expect($cache->has('key1'))->toBeFalse();
+
+            // Test with expired item
+            $cache->set('key1', 'value1', 1);
+            expect($cache->has('key1'))->toBeTrue();
+
+            sleep(2);
+            expect($cache->has('key1'))->toBeFalse();
+        });
+
         it('supports multiple operations', function (): void {
             $cache = CacheFactory::createArrayCache('test', 10);
 

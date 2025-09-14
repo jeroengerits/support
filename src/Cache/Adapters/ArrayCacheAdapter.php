@@ -39,7 +39,6 @@ class ArrayCacheAdapter implements CacheAdapter
      * @return mixed  The cached value or default
      *
      * @throws InvalidCacheKeyException
-     * @throws InvalidCacheKeyException
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -100,7 +99,6 @@ class ArrayCacheAdapter implements CacheAdapter
      * @return bool   True if the key was deleted, false if not found
      *
      * @throws InvalidCacheKeyException
-     * @throws InvalidCacheKeyException
      */
     public function delete(string $key): bool
     {
@@ -138,7 +136,6 @@ class ArrayCacheAdapter implements CacheAdapter
      * @return iterable Associative array of key => value pairs
      *
      * @throws InvalidCacheKeyException
-     * @throws InvalidCacheKeyException
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
@@ -158,7 +155,6 @@ class ArrayCacheAdapter implements CacheAdapter
      * @param  null|int|DateInterval $ttl    Time to live
      * @return bool                  True on success, false on failure
      *
-     * @throws InvalidCacheKeyException
      * @throws InvalidCacheKeyException
      */
     public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
@@ -181,7 +177,6 @@ class ArrayCacheAdapter implements CacheAdapter
      * @return bool     True on success, false on failure
      *
      * @throws InvalidCacheKeyException
-     * @throws InvalidCacheKeyException
      */
     public function deleteMultiple(iterable $keys): bool
     {
@@ -203,11 +198,19 @@ class ArrayCacheAdapter implements CacheAdapter
      * @return bool   True if key exists and is not expired, false otherwise
      *
      * @throws InvalidCacheKeyException
-     * @throws InvalidCacheKeyException
      */
     public function has(string $key): bool
     {
-        return $this->get($key, '__NOT_FOUND__') !== '__NOT_FOUND__';
+        $cacheKey = CacheKey::create($key, $this->namespace);
+        $fullKey = (string) $cacheKey;
+
+        if (! isset($this->cache[$fullKey])) {
+            return false;
+        }
+
+        $item = $this->cache[$fullKey];
+
+        return ! $this->isExpired($item['expires']);
     }
 
     /**
@@ -259,15 +262,11 @@ class ArrayCacheAdapter implements CacheAdapter
         }
 
         if ($ttl instanceof DateInterval) {
-            // Convert DateInterval to seconds manually
-            $seconds = ($ttl->y * 365 * 24 * 3600) +
-                      ($ttl->m * 30 * 24 * 3600) +
-                      ($ttl->d * 24 * 3600) +
-                      ($ttl->h * 3600) +
-                      ($ttl->i * 60) +
-                      $ttl->s;
+            // Use proper DateTime calculations for accurate DateInterval conversion
+            $now = new \DateTime;
+            $expires = (clone $now)->add($ttl);
 
-            return $seconds + time();
+            return $expires->getTimestamp();
         }
 
         return $ttl + time();

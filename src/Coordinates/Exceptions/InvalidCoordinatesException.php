@@ -11,7 +11,7 @@ use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
 /**
  * Exception thrown when invalid coordinates are provided.
  */
-class InvalidCoordinatesException extends BaseCoordinatesException
+class InvalidCoordinatesException extends CoordinatesException
 {
     /**
      * @param string         $message  The exception message
