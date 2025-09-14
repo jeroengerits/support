@@ -16,7 +16,14 @@ class Latitude implements Equatable, Stringable
     public function __construct(public float $value)
     {
         if ($value < -90.0 || $value > 90.0) {
-            throw new InvalidLatitudeException('Latitude must be between -90 and 90');
+            throw InvalidLatitudeException::outOfRange(
+                $value,
+                [
+                    'min_value' => -90.0,
+                    'max_value' => 90.0,
+                    'provided_value' => $value,
+                ]
+            );
         }
     }
 

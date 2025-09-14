@@ -8,7 +8,7 @@ Provides a robust system for handling geographic coordinates with proper validat
 
 ### Value Objects
 
-Provides `Latitude`, `Longitude` and `Coordinates` value objects for handling geographic coordinates. 
+Provides `Latitude`, `Longitude` and `Coordinates` value objects for handling geographic coordinates.
 
 ```php
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
@@ -68,6 +68,30 @@ $longitude = longitude(4.9041);
 $coordinates = coordinates(
     latitude(52.3676),
     longitude(4.9041)
+);
+```
+
+### Distance Calculation Helper
+
+The `distanceBetweenCoordinates` helper function provides a convenient way to calculate distances between coordinates:
+
+```php
+use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+
+// Using Coordinates objects
+$amsterdam = coordinates(52.3676, 4.9041);
+$london = coordinates(51.5074, -0.1278);
+$distance = distanceBetweenCoordinates($amsterdam, $london);
+// Result: ~357 km
+
+// Calculate in miles
+$distance = distanceBetweenCoordinates($amsterdam, $london, DistanceUnit::MILES);
+// Result: ~222 miles
+
+// Identical coordinates return 0
+$samePoint = coordinates(40.7128, -74.0060);
+$zeroDistance = distanceBetweenCoordinates($samePoint, $samePoint);
+// Result: 0.0 km
 ```
 
 ### Distance Calculation

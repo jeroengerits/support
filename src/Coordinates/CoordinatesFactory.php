@@ -43,7 +43,10 @@ class CoordinatesFactory
             is_string($value) => new Latitude((float) $value),
             is_float($value) => new Latitude($value),
             is_int($value) => new Latitude((float) $value),
-            default => throw new InvalidArgumentException('Invalid latitude value'),
+            default => throw InvalidLatitudeException::invalidType(
+                $value,
+                ['expected_types' => ['float', 'int', 'string', 'Latitude'], 'actual_type' => gettype($value)]
+            ),
         };
     }
 
@@ -61,7 +64,10 @@ class CoordinatesFactory
             is_string($value) => new Longitude((float) $value),
             is_float($value) => new Longitude($value),
             is_int($value) => new Longitude((float) $value),
-            default => throw new InvalidArgumentException('Invalid longitude value'),
+            default => throw InvalidLongitudeException::invalidType(
+                $value,
+                ['expected_types' => ['float', 'int', 'string', 'Longitude'], 'actual_type' => gettype($value)]
+            ),
         };
     }
 }

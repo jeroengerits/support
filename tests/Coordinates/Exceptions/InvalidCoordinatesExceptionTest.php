@@ -8,7 +8,7 @@ it('creates exception with default message', function (): void {
     $exception = new InvalidCoordinatesException;
 
     expect($exception->getMessage())->toBe('Invalid coordinates values provided')
-        ->and($exception->getCode())->toBe(0)
+        ->and($exception->getCode())->toBe(1001)
         ->and($exception->getPrevious())->toBeNull();
 });
 
@@ -17,7 +17,7 @@ it('creates exception with custom message', function (): void {
     $exception = new InvalidCoordinatesException($message);
 
     expect($exception->getMessage())->toBe($message)
-        ->and($exception->getCode())->toBe(0)
+        ->and($exception->getCode())->toBe(1001)
         ->and($exception->getPrevious())->toBeNull();
 });
 
@@ -35,7 +35,7 @@ it('creates exception with custom message, code and previous exception', functio
     $message = 'Custom coordinates error message';
     $code = 123;
     $previous = new Exception('Previous exception');
-    $exception = new InvalidCoordinatesException($message, $code, $previous);
+    $exception = new InvalidCoordinatesException($message, $code, null, [], $previous);
 
     expect($exception->getMessage())->toBe($message)
         ->and($exception->getCode())->toBe($code)
@@ -50,7 +50,7 @@ it('extends Exception class', function (): void {
 
 it('maintains exception chain with previous exception', function (): void {
     $previous = new Exception('Root cause');
-    $exception = new InvalidCoordinatesException('Coordinates error', 0, $previous);
+    $exception = new InvalidCoordinatesException('Coordinates error', 1001, null, [], $previous);
 
     expect($exception->getPrevious())->toBe($previous)
         ->and($exception->getPrevious()->getMessage())->toBe('Root cause');

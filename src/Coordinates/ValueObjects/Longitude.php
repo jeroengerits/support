@@ -16,7 +16,14 @@ class Longitude implements Equatable, Stringable
     public function __construct(public float $value)
     {
         if ($value < -180.0 || $value > 180.0) {
-            throw new InvalidLongitudeException('Longitude must be between -180 and 180');
+            throw InvalidLongitudeException::outOfRange(
+                $value,
+                [
+                    'min_value' => -180.0,
+                    'max_value' => 180.0,
+                    'provided_value' => $value,
+                ]
+            );
         }
     }
 

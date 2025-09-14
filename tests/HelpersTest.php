@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -65,7 +68,7 @@ it('throws exception for invalid latitude value', function (): void {
 
 it('throws exception for out of range latitude value', function (): void {
     expect(fn (): Latitude => latitude(100.0))
-        ->toThrow(\JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException::class, 'Latitude must be between -90 and 90');
+        ->toThrow(InvalidLatitudeException::class, 'Latitude value is outside the valid range of -90.0 to +90.0 degrees');
 });
 
 it('creates longitude with float value', function (): void {
@@ -103,7 +106,7 @@ it('throws exception for invalid longitude value', function (): void {
 
 it('throws exception for out of range longitude value', function (): void {
     expect(fn (): Longitude => longitude(200.0))
-        ->toThrow(\JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException::class, 'Longitude must be between -180 and 180');
+        ->toThrow(InvalidLongitudeException::class, 'Longitude value is outside the valid range of -180.0 to +180.0 degrees');
 });
 
 it('can be used together to create coordinates', function (): void {
@@ -125,4 +128,30 @@ it('can be chained for fluent creation', function (): void {
     expect($coordinates)->toBeInstanceOf(Coordinates::class)
         ->and($coordinates->latitude->value)->toBe(40.7128)
         ->and($coordinates->longitude->value)->toBe(-74.0060);
+});
+
+it('calculates distance between coordinates using Coordinates objects', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $b = coordinates(52.3736, 4.9101);
+    $distance = distanceBetweenCoordinates($a, $b);
+
+    expect($distance)->toBeGreaterThan(0.7)
+        ->and($distance)->toBeLessThan(0.9);
+});
+
+it('calculates distance in miles when specified', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $b = coordinates(52.3736, 4.9101);
+    $distance = distanceBetweenCoordinates($a, $b, DistanceUnit::MILES);
+
+    expect($distance)->toBeGreaterThan(0.4)
+        ->and($distance)->toBeLessThan(0.6);
+});
+
+it('returns zero distance for identical coordinates', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $b = coordinates(52.3676, 4.9041);
+    $distance = distanceBetweenCoordinates($a, $b);
+
+    expect($distance)->toBe(0.0);
 });

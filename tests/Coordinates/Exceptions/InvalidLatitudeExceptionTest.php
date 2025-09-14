@@ -8,7 +8,7 @@ it('creates exception with default message', function (): void {
     $exception = new InvalidLatitudeException;
 
     expect($exception->getMessage())->toBe('Invalid latitude value provided')
-        ->and($exception->getCode())->toBe(0)
+        ->and($exception->getCode())->toBe(1001)
         ->and($exception->getPrevious())->toBeNull();
 });
 
@@ -17,7 +17,7 @@ it('creates exception with custom message', function (): void {
     $exception = new InvalidLatitudeException($message);
 
     expect($exception->getMessage())->toBe($message)
-        ->and($exception->getCode())->toBe(0)
+        ->and($exception->getCode())->toBe(1001)
         ->and($exception->getPrevious())->toBeNull();
 });
 
@@ -35,7 +35,7 @@ it('creates exception with custom message, code and previous exception', functio
     $message = 'Custom latitude error message';
     $code = 123;
     $previous = new Exception('Previous exception');
-    $exception = new InvalidLatitudeException($message, $code, $previous);
+    $exception = new InvalidLatitudeException($message, $code, null, [], $previous);
 
     expect($exception->getMessage())->toBe($message)
         ->and($exception->getCode())->toBe($code)

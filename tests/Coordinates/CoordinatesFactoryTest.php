@@ -195,7 +195,7 @@ it('throws exception for invalid latitude value', function (): void {
 
 it('throws exception for out of range latitude value', function (): void {
     expect(fn (): Latitude => CoordinatesFactory::createLatitude(100.0))
-        ->toThrow(InvalidLatitudeException::class, 'Latitude must be between -90 and 90');
+        ->toThrow(InvalidLatitudeException::class, 'Latitude value is outside the valid range of -90.0 to +90.0 degrees');
 });
 
 // Tests for createLongitude method
@@ -234,5 +234,5 @@ it('throws exception for invalid longitude value', function (): void {
 
 it('throws exception for out of range longitude value', function (): void {
     expect(fn (): Longitude => CoordinatesFactory::createLongitude(200.0))
-        ->toThrow(InvalidLongitudeException::class, 'Longitude must be between -180 and 180');
+        ->toThrow(InvalidLongitudeException::class, 'Longitude value is outside the valid range of -180.0 to +180.0 degrees');
 });
