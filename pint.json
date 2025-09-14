@@ -3,14 +3,7 @@
   "rules": {
     "simplified_null_return": true,
     "blank_line_before_statement": {
-      "statements": [
-        "break",
-        "continue",
-        "declare",
-        "return",
-        "throw",
-        "try"
-      ]
+      "statements": ["break", "continue", "declare", "return", "throw", "try"]
     },
     "method_argument_space": {
       "on_multiline": "ensure_fully_multiline"
@@ -26,10 +19,7 @@
       ]
     },
     "no_spaces_around_offset": {
-      "positions": [
-        "inside",
-        "outside"
-      ]
+      "positions": ["inside", "outside"]
     },
     "no_unused_imports": true,
     "ordered_imports": {
@@ -37,13 +27,7 @@
     },
     "phpdoc_align": {
       "align": "vertical",
-      "tags": [
-        "param",
-        "return",
-        "throws",
-        "type",
-        "var"
-      ]
+      "tags": ["param", "return", "throws", "type", "var"]
     },
     "phpdoc_indent": true,
     "phpdoc_inline_tag_normalizer": true,
@@ -62,9 +46,7 @@
     "single_import_per_statement": true,
     "single_line_after_imports": true,
     "single_line_comment_style": {
-      "comment_types": [
-        "hash"
-      ]
+      "comment_types": ["hash"]
     },
     "single_quote": true,
     "space_after_semicolon": true,
