@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Coordinates\CoordinatesFactory;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -63,22 +65,22 @@ it('creates coordinates with string latitude and longitude object', function ():
 });
 
 it('throws exception for invalid latitude type', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(null, 4.9041))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(null, 4.9041))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for invalid longitude type', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(52.3676, null))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(52.3676, null))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for array latitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates([52.3676], 4.9041))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates([52.3676], 4.9041))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for array longitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(52.3676, [4.9041]))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(52.3676, [4.9041]))
         ->toThrow(TypeError::class);
 });
 
@@ -138,22 +140,22 @@ it('creates coordinates with string integer values', function (): void {
 });
 
 it('throws exception for boolean latitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(true, 4.9041))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(true, 4.9041))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for boolean longitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(52.3676, false))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(52.3676, false))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for object latitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(new stdClass, 4.9041))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(new stdClass, 4.9041))
         ->toThrow(TypeError::class);
 });
 
 it('throws exception for object longitude', function (): void {
-    expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates => CoordinatesFactory::createCoordinates(52.3676, new stdClass))
+    expect(fn (): Coordinates => CoordinatesFactory::createCoordinates(52.3676, new stdClass))
         ->toThrow(TypeError::class);
 });
 
@@ -193,7 +195,7 @@ it('throws exception for invalid latitude value', function (): void {
 
 it('throws exception for out of range latitude value', function (): void {
     expect(fn (): Latitude => CoordinatesFactory::createLatitude(100.0))
-        ->toThrow(\JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException::class, 'Latitude must be between -90 and 90');
+        ->toThrow(InvalidLatitudeException::class, 'Latitude must be between -90 and 90');
 });
 
 // Tests for createLongitude method
@@ -232,5 +234,5 @@ it('throws exception for invalid longitude value', function (): void {
 
 it('throws exception for out of range longitude value', function (): void {
     expect(fn (): Longitude => CoordinatesFactory::createLongitude(200.0))
-        ->toThrow(\JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException::class, 'Longitude must be between -180 and 180');
+        ->toThrow(InvalidLongitudeException::class, 'Longitude must be between -180 and 180');
 });

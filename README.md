@@ -69,10 +69,10 @@ $coordinates = CoordinatesFactory::createCoordinates($latitude, $longitude);
 // Mixed types
 $coordinates = CoordinatesFactory::createCoordinates('52.3676', 4.9041);
 
-// Longitute
+// Longitude
 $longitude = CoordinatesFactory::createLongitude(12.3);
 
-// Longitute
+// Latitude
 $latitude = CoordinatesFactory::createLatitude(22.3);
 ```
 
@@ -102,6 +102,35 @@ $coordinates = coordinates(
 );
 ```
 
+### Distance Calculation
+
+The `CoordinatesCalculator` provides accurate distance calculations between coordinates using the Haversine formula:
+
+```php
+use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
+use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+
+// Calculate distance in kilometers (default)
+$amsterdam = coordinates(52.3676, 4.9041);
+$london = coordinates(51.5074, -0.1278);
+$distanceKm = CoordinatesCalculator::calculateDistance($amsterdam, $london);
+// Result: ~357 km
+
+// Calculate distance in miles
+$distanceMiles = CoordinatesCalculator::calculateDistance($amsterdam, $london, DistanceUnit::MILES);
+// Result: ~222 miles
+
+// Identical coordinates return 0
+$samePoint = coordinates(40.7128, -74.0060);
+$zeroDistance = CoordinatesCalculator::calculateDistance($samePoint, $samePoint);
+// Result: 0.0
+```
+
+#### Supported Distance Units
+
+- **KILOMETERS** (default): Earth radius = 6,371 km
+- **MILES**: Earth radius = 3,958.8 miles
+
 ### Equality Comparison
 
 All coordinate value objects implement the `Equatable` interface for proper equality comparison:
@@ -112,194 +141,3 @@ $coordinates2 = coordinates(52.3676, 4.9041);
 
 $coordinates1->isEqual($coordinates2); // true
 ```
-
-### Exception Handling
-
-The package provides specific exceptions for different types of validation errors:
-
-#### InvalidLatitudeException
-Thrown when a latitude value is outside the valid range (-90° to +90°):
-
-```php
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-
-try {
-    $latitude = latitude(100.0); // Invalid latitude
-} catch (InvalidLatitudeException $e) {
-    echo $e->getMessage(); // "Latitude must be between -90 and 90"
-}
-```
-
-#### InvalidLongitudeException
-Thrown when a longitude value is outside the valid range (-180° to +180°):
-
-```php
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
-
-try {
-    $longitude = longitude(200.0); // Invalid longitude
-} catch (InvalidLongitudeException $e) {
-    echo $e->getMessage(); // "Longitude must be between -180 and 180"
-}
-```
-
-#### InvalidCoordinatesException
-Thrown when coordinate data is invalid or missing:
-
-```php
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-
-try {
-    $coordinates = coordinates(['invalid' => 'data']); // Missing lat/lng
-} catch (InvalidCoordinatesException $e) {
-    echo $e->getMessage(); // "Array must contain latitude and longitude values"
-}
-```
-
-## Testing
-
-The package includes comprehensive test coverage using Pest PHP:
-
-```bash
-# Run all tests
-./vendor/bin/pest
-
-# Run tests with coverage
-./vendor/bin/pest --coverage
-
-# Run specific test file
-./vendor/bin/pest tests/Coordinates/CoordinatesFactoryTest.php
-
-# Run helper functions tests
-./vendor/bin/pest tests/HelpersTest.php
-
-# Run exception tests
-./vendor/bin/pest tests/Coordinates/Exceptions/
-```
-
-### Test Coverage
-
-- **CoordinatesFactory**: 100% coverage
-- **Helper Functions**: 100% coverage for all helper functions
-- **Exception Classes**: 100% coverage for all custom exceptions
-- **Value Objects**: Comprehensive validation testing
-- **Edge Cases**: Boundary values, invalid inputs, type safety
-- **Exception Handling**: Proper error handling for invalid inputs
-
-## App Package
-
-The App package provides a simple dependency injection container wrapper using League Container, allowing you to create
-applications with service registration and automatic dependency injection.
-
-### Basic Usage
-
-```php
-use JeroenGerits\Support\App\App;
-use JeroenGerits\Support\App\Services\LoggerService;
-use JeroenGerits\Support\App\Services\HelloWorldService;
-
-// Create a new app
-$app = App::new('My App');
-
-// Register services
-$app->addService(LoggerService::class);
-$app->addService(HelloWorldService::class);
-
-// Use the services
-$logger = $app->get(LoggerService::class);
-$helloService = $app->get(HelloWorldService::class);
-
-// The HelloWorldService will automatically get the LoggerService injected
-echo $helloService->sayHello('PHP Developer'); // Outputs: Hello, PHP Developer!
-```
-
-### Service Registration
-
-#### Register by Class Name
-
-```php
-$app->addService(LoggerService::class);
-$service = $app->get(LoggerService::class);
-```
-
-#### Register with Alias
-
-```php
-$app->addServiceWithAlias('logger', LoggerService::class);
-$service = $app->get('logger');
-```
-
-#### Check if Service Exists
-
-```php
-if ($app->has('logger')) {
-    $logger = $app->get('logger');
-}
-```
-
-### Built-in Services
-
-#### LoggerService
-
-A simple logging service that outputs formatted messages to the console.
-
-```php
-$logger = $app->get(LoggerService::class);
-
-$logger->info('Application started');
-$logger->warning('This is a warning');
-$logger->error('An error occurred');
-$logger->debug('Debug information');
-```
-
-#### HelloWorldService
-
-A demonstration service that shows dependency injection in action.
-
-```php
-$helloService = $app->get(HelloWorldService::class);
-
-echo $helloService->sayHello('World'); // Hello, World!
-echo $helloService->greet();           // Hello, World!
-```
-
-### Advanced Usage
-
-#### Custom Service Providers
-
-```php
-use League\Container\ServiceProvider\ServiceProviderInterface;
-
-class MyServiceProvider implements ServiceProviderInterface
-{
-    public function provides(string $id): bool
-    {
-        return $id === 'my-service';
-    }
-
-    public function register(): void
-    {
-        // Register your services here
-    }
-}
-
-$app->addServiceProvider(new MyServiceProvider());
-```
-
-#### Service Configuration
-
-```php
-// Configure a service with specific settings
-$app->addService(LoggerService::class)
-    ->addArgument('custom-logger-name');
-```
-
-## Requirements
-
-- PHP 8.4 or higher
-- League Container ^5.0
-- Pest PHP (for testing)
-
-## License
-
-MIT License. See [LICENSE](LICENSE) file for details.

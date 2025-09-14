@@ -13,9 +13,9 @@ if (! function_exists('coordinates')) {
     /**
      * Create a new Coordinates instance from latitude and longitude values.
      *
-     * @param float|string|array|int|Latitude|null $latitude The latitude value
-     * @param float|int|string|Longitude|null $longitude The longitude value (optional)
-     * @return Coordinates
+     * @param float|string|array|int|Latitude|null $latitude  The latitude value
+     * @param float|int|string|Longitude|null      $longitude The longitude value (optional)
+     *
      * @throws InvalidLatitudeException
      * @throws InvalidLongitudeException
      */

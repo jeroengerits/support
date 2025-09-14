@@ -7,7 +7,7 @@ namespace JeroenGerits\Support\Coordinates\ValueObjects;
 use JeroenGerits\Support\Contracts\Equatable;
 use Stringable;
 
-class Coordinates implements Stringable, Equatable
+class Coordinates implements Equatable, Stringable
 {
     /**
      * Create a new Coordinates instance.

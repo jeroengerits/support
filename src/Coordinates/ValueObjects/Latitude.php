@@ -8,7 +8,7 @@ use JeroenGerits\Support\Contracts\Equatable;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
 use Stringable;
 
-class Latitude implements Stringable, Equatable
+class Latitude implements Equatable, Stringable
 {
     /**
      * @throws InvalidLatitudeException
