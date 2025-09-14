@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
+use JeroenGerits\Support\Coordinates\CoordinatesFactory;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 
 it('calculates distance between two coordinates in kilometers', function (): void {
-    $coordinates1 = coordinates(52.3676, 4.9041); // Amsterdam
-    $coordinates2 = coordinates(52.3736, 4.9101); // Close to Amsterdam
+    $coordinates1 = CoordinatesFactory::createCoordinates(52.3676, 4.9041); // Amsterdam
+    $coordinates2 = CoordinatesFactory::createCoordinates(52.3736, 4.9101); // Close to Amsterdam
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($coordinates1, $coordinates2);
 
@@ -17,8 +18,8 @@ it('calculates distance between two coordinates in kilometers', function (): voi
 });
 
 it('calculates distance between two coordinates in miles', function (): void {
-    $coordinates1 = coordinates(52.3676, 4.9041); // Amsterdam
-    $coordinates2 = coordinates(52.3736, 4.9101); // Close to Amsterdam
+    $coordinates1 = CoordinatesFactory::createCoordinates(52.3676, 4.9041); // Amsterdam
+    $coordinates2 = CoordinatesFactory::createCoordinates(52.3736, 4.9101); // Close to Amsterdam
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($coordinates1, $coordinates2, DistanceUnit::MILES);
 
@@ -28,8 +29,8 @@ it('calculates distance between two coordinates in miles', function (): void {
 });
 
 it('returns zero distance for identical coordinates', function (): void {
-    $coordinates1 = coordinates(52.3676, 4.9041);
-    $coordinates2 = coordinates(52.3676, 4.9041);
+    $coordinates1 = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
+    $coordinates2 = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($coordinates1, $coordinates2);
 
@@ -37,8 +38,8 @@ it('returns zero distance for identical coordinates', function (): void {
 });
 
 it('calculates distance between distant cities', function (): void {
-    $amsterdam = coordinates(52.3676, 4.9041); // Amsterdam
-    $london = coordinates(51.5074, -0.1278);   // London
+    $amsterdam = CoordinatesFactory::createCoordinates(52.3676, 4.9041); // Amsterdam
+    $london = CoordinatesFactory::createCoordinates(51.5074, -0.1278);   // London
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($amsterdam, $london);
 
@@ -48,8 +49,8 @@ it('calculates distance between distant cities', function (): void {
 });
 
 it('calculates distance between antipodal points', function (): void {
-    $point1 = coordinates(0, 0);     // Equator, Prime Meridian
-    $point2 = coordinates(0, 180);   // Equator, International Date Line
+    $point1 = CoordinatesFactory::createCoordinates(0.0, 0.0);     // Equator, Prime Meridian
+    $point2 = CoordinatesFactory::createCoordinates(0.0, 180.0);   // Equator, International Date Line
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($point1, $point2);
 
@@ -59,8 +60,8 @@ it('calculates distance between antipodal points', function (): void {
 });
 
 it('handles negative coordinates correctly', function (): void {
-    $point1 = coordinates(-33.9249, 18.4241); // Cape Town
-    $point2 = coordinates(-26.2041, 28.0473); // Johannesburg
+    $point1 = CoordinatesFactory::createCoordinates(-33.9249, 18.4241); // Cape Town
+    $point2 = CoordinatesFactory::createCoordinates(-26.2041, 28.0473); // Johannesburg
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($point1, $point2);
 
@@ -70,8 +71,8 @@ it('handles negative coordinates correctly', function (): void {
 });
 
 it('calculates distance with very small differences', function (): void {
-    $point1 = coordinates(40.7128, -74.0060); // New York
-    $point2 = coordinates(40.7129, -74.0061); // Very close to New York
+    $point1 = CoordinatesFactory::createCoordinates(40.7128, -74.0060); // New York
+    $point2 = CoordinatesFactory::createCoordinates(40.7129, -74.0061); // Very close to New York
     $calculator = new CoordinatesCalculator;
     $distance = $calculator->distanceBetween($point1, $point2);
 

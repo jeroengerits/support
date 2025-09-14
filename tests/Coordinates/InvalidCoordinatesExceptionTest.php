@@ -51,14 +51,14 @@ it('extends Exception class', function (): void {
 it('creates exception for latitude out of range', function (): void {
     $exception = InvalidCoordinatesException::latitudeOutOfRange(100.0);
 
-    expect($exception->getMessage())->toBe('Latitude value 100 is outside the valid range of -90.0 to +90.0 degrees')
+    expect($exception->getMessage())->toBe('Latitude value 100 is outside the valid range of -90 to 90 degrees')
         ->and($exception->getCode())->toBe(1002);
 });
 
 it('creates exception for longitude out of range', function (): void {
     $exception = InvalidCoordinatesException::longitudeOutOfRange(200.0);
 
-    expect($exception->getMessage())->toBe('Longitude value 200 is outside the valid range of -180.0 to +180.0 degrees')
+    expect($exception->getMessage())->toBe('Longitude value 200 is outside the valid range of -180 to 180 degrees')
         ->and($exception->getCode())->toBe(1002);
 });
 
