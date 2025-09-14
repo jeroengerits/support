@@ -11,6 +11,10 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 {
     /**
      * Create a new InvalidCoordinatesException instance.
+     *
+     * @param string          $message  The exception message
+     * @param int             $code     The exception code
+     * @param \Exception|null $previous The previous exception for chaining
      */
     public function __construct(
         string $message = 'Invalid coordinates provided',
@@ -22,6 +26,9 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception for latitude values outside the valid range.
+     *
+     * @param  float  $value The latitude value that is out of range
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function latitudeOutOfRange(float $value): static
     {
@@ -33,6 +40,9 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception for longitude values outside the valid range.
+     *
+     * @param  float  $value The longitude value that is out of range
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function longitudeOutOfRange(float $value): static
     {
@@ -44,6 +54,10 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception for invalid coordinate type.
+     *
+     * @param  mixed  $value          The invalid value that was provided
+     * @param  string $coordinateType The type of coordinate (latitude, longitude, or coordinate)
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function invalidType(mixed $value, string $coordinateType = 'coordinate'): static
     {
@@ -59,6 +73,10 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception for invalid coordinate format.
+     *
+     * @param  string $value          The invalid format string that was provided
+     * @param  string $coordinateType The type of coordinate (latitude, longitude, or coordinate)
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function invalidFormat(string $value, string $coordinateType = 'coordinate'): static
     {
@@ -72,6 +90,10 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception when coordinates are missing from array.
+     *
+     * @param  array  $array      The array that was provided
+     * @param  string $missingKey The key that was missing from the array
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function missingFromArray(array $array, string $missingKey): static
     {
@@ -85,6 +107,9 @@ class InvalidCoordinatesException extends BaseCoordinatesException
 
     /**
      * Create an exception for invalid array structure.
+     *
+     * @param  array  $array The array that has an invalid structure
+     * @return static A new InvalidCoordinatesException instance
      */
     public static function invalidArrayStructure(array $array): static
     {

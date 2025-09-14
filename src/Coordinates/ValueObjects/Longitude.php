@@ -11,7 +11,11 @@ use Stringable;
 class Longitude implements Equatable, Stringable
 {
     /**
-     * @throws InvalidCoordinatesException
+     * Create a new Longitude instance.
+     *
+     * @param float $value The longitude value in decimal degrees (-180.0 to +180.0)
+     *
+     * @throws InvalidCoordinatesException When longitude value is outside valid range
      */
     public function __construct(public float $value)
     {

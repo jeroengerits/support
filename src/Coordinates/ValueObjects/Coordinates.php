@@ -15,8 +15,8 @@ class Coordinates implements Equatable, Stringable
     /**
      * Create a new Coordinates instance.
      *
-     * @param Latitude  $latitude  The latitude value
-     * @param Longitude $longitude The longitude value
+     * @param Latitude  $latitude  The latitude value object
+     * @param Longitude $longitude The longitude value object
      */
     public function __construct(public Latitude $latitude, public Longitude $longitude) {}
 

@@ -11,7 +11,11 @@ use Stringable;
 class Latitude implements Equatable, Stringable
 {
     /**
-     * @throws InvalidCoordinatesException
+     * Create a new Latitude instance.
+     *
+     * @param float $value The latitude value in decimal degrees (-90.0 to +90.0)
+     *
+     * @throws InvalidCoordinatesException When latitude value is outside valid range
      */
     public function __construct(public float $value)
     {

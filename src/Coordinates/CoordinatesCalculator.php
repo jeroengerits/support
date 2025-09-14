@@ -158,6 +158,12 @@ class CoordinatesCalculator
 
     /**
      * Get the Earth radius for the specified unit and model.
+     *
+     * @param  DistanceUnit $unit       The distance unit
+     * @param  string       $earthModel The Earth model to use
+     * @return float        The Earth radius in the specified unit
+     *
+     * @throws \InvalidArgumentException When the Earth model is not supported
      */
     private function getEarthRadius(DistanceUnit $unit, string $earthModel): float
     {
@@ -176,6 +182,9 @@ class CoordinatesCalculator
 
     /**
      * Get cached radians conversion.
+     *
+     * @param  float $degrees The degrees value to convert to radians
+     * @return float The radians value
      */
     private function getCachedRadians(float $degrees): float
     {
@@ -189,6 +198,9 @@ class CoordinatesCalculator
 
     /**
      * Get cached sine value.
+     *
+     * @param  float $radians The radians value to calculate sine for
+     * @return float The sine value
      */
     private function getCachedSin(float $radians): float
     {
@@ -202,6 +214,9 @@ class CoordinatesCalculator
 
     /**
      * Get cached cosine value.
+     *
+     * @param  float $radians The radians value to calculate cosine for
+     * @return float The cosine value
      */
     private function getCachedCos(float $radians): float
     {
