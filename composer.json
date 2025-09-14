@@ -45,7 +45,9 @@
     "refactor:dry-run": "rector --dry-run",
     "test": "pest",
     "test:coverage": "pest --coverage",
-    "all": "pint && rector && pest"
+    "docs": "php phpdoc.phar -d src -t docs --title=\"Support\" --defaultpackagename=\"JeroenGerits\\Support\" docs",
+    "docs:clean": "rm -rf docs",
+    "all": "pint && rector && pest && composer docs"
   },
   "minimum-stability": "stable",
   "prefer-stable": true

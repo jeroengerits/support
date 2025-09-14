@@ -7,3 +7,7 @@
 coverage.xml
 /.PLANS/
 .cursorrules
+/docs/
+/.phpdoc/build/
+/.phpdoc/cache/
+

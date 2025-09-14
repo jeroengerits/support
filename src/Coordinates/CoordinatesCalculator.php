@@ -14,19 +14,26 @@ use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
  * the Haversine formula with caching, multiple Earth models, and batch processing
  * capabilities for improved performance.
  *
+ * @package JeroenGerits\Support\Coordinates
+ * @since   1.0.0
+ *
  * @example
  * ```php
  * use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
  * use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
  *
  * $calculator = new CoordinatesCalculator();
- * $distance = $calculator->distanceBetween($coord1, $coord2, DistanceUnit::KILOMETERS);
+ * $distance = $calculator->distanceBetween(
+ *     coordinates(40.7128, -74.0060), // New York
+ *     coordinates(51.5074, -0.1278),  // London
+ *     DistanceUnit::KILOMETERS
+ * );
  *
  * // Batch calculation for multiple coordinate pairs
  * $distances = $calculator->batchDistanceCalculation([
- *     [$coord1, $coord2],
- *     [$coord3, $coord4],
- *     [$coord5, $coord6],
+ *     [coordinates(40.7128, -74.0060), coordinates(51.5074, -0.1278)], // NY to London
+ *     [coordinates(48.8566, 2.3522), coordinates(35.6762, 139.6503)],   // Paris to Tokyo
+ *     [coordinates(-33.8688, 151.2093), coordinates(-34.6037, -58.3816)], // Sydney to Buenos Aires
  * ], DistanceUnit::KILOMETERS);
  * ```
  */
@@ -80,6 +87,18 @@ class CoordinatesCalculator
      *
      * This method can be called to free up memory if the cache becomes too large.
      * The cache will be rebuilt as needed for future calculations.
+     *
+     * @example
+     * ```php
+     * // Clear cache to free memory
+     * CoordinatesCalculator::clearCache();
+     *
+     * // Check cache size before clearing
+     * $size = CoordinatesCalculator::getCacheSize();
+     * if ($size > 1000) {
+     *     CoordinatesCalculator::clearCache();
+     * }
+     * ```
      */
     public static function clearCache(): void
     {
@@ -91,6 +110,22 @@ class CoordinatesCalculator
      * Get the size of the trigonometric cache.
      *
      * @return int The number of cached trigonometric values
+     *
+     * @example
+     * ```php
+     * // Check cache size
+     * $size = CoordinatesCalculator::getCacheSize();
+     * echo "Cache contains {$size} entries";
+     *
+     * // Monitor cache growth
+     * $calculator = new CoordinatesCalculator();
+     * $calculator->distanceBetween(
+     *     coordinates(40.7128, -74.0060),
+     *     coordinates(51.5074, -0.1278)
+     * );
+     * $newSize = CoordinatesCalculator::getCacheSize();
+     * echo "Cache grew by " . ($newSize - $size) . " entries";
+     * ```
      */
     public static function getCacheSize(): int
     {
@@ -164,6 +199,19 @@ class CoordinatesCalculator
      * @return float        The Earth radius in the specified unit
      *
      * @throws \InvalidArgumentException When the Earth model is not supported
+     *
+     * @example
+     * ```php
+     * $calculator = new CoordinatesCalculator();
+     *
+     * // Get Earth radius for different models and units
+     * $radiusKm = $calculator->getEarthRadius(DistanceUnit::KILOMETERS, 'wgs84');
+     * $radiusMi = $calculator->getEarthRadius(DistanceUnit::MILES, 'wgs84');
+     *
+     * // Different Earth models have slightly different radii
+     * $wgs84Radius = $calculator->getEarthRadius(DistanceUnit::KILOMETERS, 'wgs84');
+     * $grs80Radius = $calculator->getEarthRadius(DistanceUnit::KILOMETERS, 'grs80');
+     * ```
      */
     private function getEarthRadius(DistanceUnit $unit, string $earthModel): float
     {
@@ -185,6 +233,20 @@ class CoordinatesCalculator
      *
      * @param  float $degrees The degrees value to convert to radians
      * @return float The radians value
+     *
+     * @example
+     * ```php
+     * $calculator = new CoordinatesCalculator();
+     *
+     * // First call calculates and caches the result
+     * $radians1 = $calculator->getCachedRadians(40.7128);
+     *
+     * // Subsequent calls with same value use cache
+     * $radians2 = $calculator->getCachedRadians(40.7128); // Uses cache
+     *
+     * // Different values are calculated and cached separately
+     * $radians3 = $calculator->getCachedRadians(51.5074); // New calculation
+     * ```
      */
     private function getCachedRadians(float $degrees): float
     {
@@ -201,6 +263,20 @@ class CoordinatesCalculator
      *
      * @param  float $radians The radians value to calculate sine for
      * @return float The sine value
+     *
+     * @example
+     * ```php
+     * $calculator = new CoordinatesCalculator();
+     *
+     * // First call calculates and caches the result
+     * $sin1 = $calculator->getCachedSin(0.5);
+     *
+     * // Subsequent calls with same value use cache
+     * $sin2 = $calculator->getCachedSin(0.5); // Uses cache
+     *
+     * // Different values are calculated and cached separately
+     * $sin3 = $calculator->getCachedSin(1.0); // New calculation
+     * ```
      */
     private function getCachedSin(float $radians): float
     {
@@ -217,6 +293,20 @@ class CoordinatesCalculator
      *
      * @param  float $radians The radians value to calculate cosine for
      * @return float The cosine value
+     *
+     * @example
+     * ```php
+     * $calculator = new CoordinatesCalculator();
+     *
+     * // First call calculates and caches the result
+     * $cos1 = $calculator->getCachedCos(0.5);
+     *
+     * // Subsequent calls with same value use cache
+     * $cos2 = $calculator->getCachedCos(0.5); // Uses cache
+     *
+     * // Different values are calculated and cached separately
+     * $cos3 = $calculator->getCachedCos(1.0); // New calculation
+     * ```
      */
     private function getCachedCos(float $radians): float
     {
