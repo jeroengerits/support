@@ -92,9 +92,9 @@ describe('Coordinates Package', function (): void {
                 $coordinates = Coordinates::create(40.7128, -74.0060);
 
                 // Create a mock object that implements Equatable but is not a Coordinates
-                $other = new class implements \JeroenGerits\Support\Contracts\Equatable
+                $other = new class implements \JeroenGerits\Support\Shared\Contracts\Equatable
                 {
-                    public function isEqual(\JeroenGerits\Support\Contracts\Equatable $other): bool
+                    public function isEqual(\JeroenGerits\Support\Shared\Contracts\Equatable $other): bool
                     {
                         return false;
                     }

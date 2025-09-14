@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Contracts;
+namespace JeroenGerits\Support\Shared\Contracts;
 
 /**
  * Interface for objects that can be compared for equality.

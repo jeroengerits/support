@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use JeroenGerits\Support\Contracts\Equatable;
+use JeroenGerits\Support\Cache\CacheFactory;
+use JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface;
+use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
+use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Enums\EarthModel;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
+use JeroenGerits\Support\Shared\Contracts\Equatable;
 use Stringable;
 
 /**
@@ -41,11 +45,8 @@ class Coordinates implements Equatable, Stringable
     // Distance calculation constants
     private const float ZERO_DISTANCE = 0.0;
 
-    /** @var array<string, float> Cache for trigonometric calculations */
-    private static array $trigonometricCache = [];
-
-    /** @var array<string, float> Cache for Earth radius calculations */
-    private static array $earthRadiusCache = [];
+    /** @var CacheAdapterInterface|null The cache adapter */
+    private static ?CacheAdapterInterface $cache = null;
 
     /**
      * Create a new Coordinates instance.
@@ -84,36 +85,76 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Clear all internal caches to free memory.
+     * Set a custom cache adapter (useful for testing).
      *
-     * This method clears both the trigonometric calculation cache and
-     * the Earth radius cache. Use this when memory usage becomes a concern
-     * or when you want to reset the cache for testing purposes.
+     * @param CacheAdapterInterface|null $cache The cache adapter to use
      */
-    public static function clearCache(): void
+    public static function setCache(?CacheAdapterInterface $cache): void
     {
-        self::$trigonometricCache = [];
-        self::$earthRadiusCache = [];
+        self::$cache = $cache;
     }
 
     /**
-     * Get the current size of the trigonometric cache.
+     * Clear all caches and reset to default.
      *
-     * @return int The number of cached trigonometric values
+     * This method clears the cache and resets it to the default configuration.
+     * Use this when memory usage becomes a concern or when you want to
+     * reset the cache for testing purposes.
+     */
+    public static function clearCache(): void
+    {
+        self::getCache()->clear();
+    }
+
+    /**
+     * Get the current cache adapter.
+     *
+     * @return CacheAdapterInterface The cache adapter
+     */
+    private static function getCache(): CacheAdapterInterface
+    {
+        if (! self::$cache instanceof \JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface) {
+            self::$cache = CacheFactory::createArrayCache(
+                namespace: 'coordinates',
+                maxItems: 5000
+            );
+        }
+
+        return self::$cache;
+    }
+
+    /**
+     * Get cache statistics.
+     *
+     * @return CacheStatsInterface Current cache statistics
+     */
+    public static function getCacheStats(): CacheStatsInterface
+    {
+        return self::getCache()->getStats();
+    }
+
+    /**
+     * Get the current size of the cache.
+     *
+     * @return int The number of cached items
+     *
+     * @deprecated Use getCacheStats()->getItems() instead
      */
     public static function getCacheSize(): int
     {
-        return count(self::$trigonometricCache);
+        return self::getCache()->getStats()->getItems();
     }
 
     /**
      * Get the current size of the Earth radius cache.
      *
      * @return int The number of cached Earth radius values
+     *
+     * @deprecated Use getCacheStats()->getItems() instead
      */
     public static function getEarthRadiusCacheSize(): int
     {
-        return count(self::$earthRadiusCache);
+        return self::getCache()->getStats()->getItems();
     }
 
     /**
@@ -241,13 +282,18 @@ class Coordinates implements Equatable, Stringable
      */
     private static function getCachedEarthRadius(DistanceUnit $unit, EarthModel $earthModel): float
     {
-        $cacheKey = "{$earthModel->value}_{$unit->value}";
+        $cache = self::getCache();
+        $key = "{$earthModel->value}_{$unit->value}";
 
-        if (! isset(self::$earthRadiusCache[$cacheKey])) {
-            self::$earthRadiusCache[$cacheKey] = $earthModel->getRadius($unit);
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
         }
 
-        return self::$earthRadiusCache[$cacheKey];
+        $radius = $earthModel->getRadius($unit);
+        $cache->set($key, $radius, TimeToLive::fromDays(30)->seconds); // Earth radius never changes
+
+        return $radius;
     }
 
     /**
@@ -340,13 +386,18 @@ class Coordinates implements Equatable, Stringable
      */
     private static function getCachedRadians(float $degrees): float
     {
-        $cacheKey = self::RADIANS_CACHE_PREFIX.$degrees;
+        $cache = self::getCache();
+        $key = self::RADIANS_CACHE_PREFIX.$degrees;
 
-        if (! isset(self::$trigonometricCache[$cacheKey])) {
-            self::$trigonometricCache[$cacheKey] = deg2rad($degrees);
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
         }
 
-        return self::$trigonometricCache[$cacheKey];
+        $radians = deg2rad($degrees);
+        $cache->set($key, $radians, TimeToLive::fromHours(24)->seconds);
+
+        return $radians;
     }
 
     /**
@@ -357,13 +408,18 @@ class Coordinates implements Equatable, Stringable
      */
     private static function getCachedSin(float $radians): float
     {
-        $cacheKey = self::SINE_CACHE_PREFIX.$radians;
+        $cache = self::getCache();
+        $key = self::SINE_CACHE_PREFIX.$radians;
 
-        if (! isset(self::$trigonometricCache[$cacheKey])) {
-            self::$trigonometricCache[$cacheKey] = sin($radians);
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
         }
 
-        return self::$trigonometricCache[$cacheKey];
+        $sine = sin($radians);
+        $cache->set($key, $sine, TimeToLive::fromHours(24)->seconds);
+
+        return $sine;
     }
 
     /**
@@ -374,12 +430,17 @@ class Coordinates implements Equatable, Stringable
      */
     private static function getCachedCos(float $radians): float
     {
-        $cacheKey = self::COSINE_CACHE_PREFIX.$radians;
+        $cache = self::getCache();
+        $key = self::COSINE_CACHE_PREFIX.$radians;
 
-        if (! isset(self::$trigonometricCache[$cacheKey])) {
-            self::$trigonometricCache[$cacheKey] = cos($radians);
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
         }
 
-        return self::$trigonometricCache[$cacheKey];
+        $cosine = cos($radians);
+        $cache->set($key, $cosine, TimeToLive::fromHours(24)->seconds);
+
+        return $cosine;
     }
 }

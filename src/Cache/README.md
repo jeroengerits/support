@@ -1,0 +1,129 @@
+# Cache Package
+
+Clean, PSR-16 compliant caching solution with TTL support and comprehensive statistics.
+
+## Features
+
+- **PSR-16 Compliant**: Standard cache interface
+- **TTL Support**: Automatic expiration with configurable time-to-live
+- **Statistics**: Built-in performance monitoring
+- **Memory Management**: LRU eviction prevents memory leaks
+- **Testable**: Dependency injection for easy mocking
+
+## Quick Start
+
+```php
+use JeroenGerits\Support\Cache\CacheFactory;
+use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
+
+// Create cache
+$cache = CacheFactory::createArrayCache('my-app', 1000);
+
+// Store with TTL
+$cache->set('user:123', ['name' => 'John'], TimeToLive::fromHours(1)->seconds);
+
+// Retrieve
+$user = $cache->get('user:123'); // Returns user data or null if expired
+
+// Check existence
+if ($cache->has('user:123')) {
+    echo "User is cached";
+}
+```
+
+## Multiple Operations
+
+```php
+// Store multiple values
+$cache->setMultiple([
+    'user:1' => ['name' => 'Alice'],
+    'user:2' => ['name' => 'Bob'],
+], TimeToLive::fromMinutes(30)->seconds);
+
+// Retrieve multiple values
+$users = $cache->getMultiple(['user:1', 'user:2'], []);
+```
+
+## Cache Statistics
+
+```php
+$stats = $cache->getStats();
+
+echo "Hit ratio: " . round($stats->getHitRatio() * 100, 2) . "%\n";
+echo "Cached items: " . $stats->getItems() . "/" . $stats->getMaxItems() . "\n";
+
+// String representation
+echo $stats; // "Cache Stats: 150 hits, 25 misses, 85.7% hit ratio, 175/1000 items (17.5% utilization)"
+```
+
+## Time-to-Live (TTL)
+
+```php
+use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
+
+// Different TTL formats
+$ttl = TimeToLive::fromSeconds(60);
+$ttl = TimeToLive::fromMinutes(5);
+$ttl = TimeToLive::fromHours(2);
+$ttl = TimeToLive::fromDays(1);
+$ttl = TimeToLive::default(); // 1 hour
+
+// Use in cache operations
+$cache->set('key', 'value', $ttl->seconds);
+```
+
+## Testing
+
+```php
+// Use null cache for testing (no-op operations)
+$testCache = CacheFactory::createNullCache('test');
+$yourClass->setCache($testCache);
+
+// Use small cache for unit tests
+$testCache = CacheFactory::createArrayCache('test', 10);
+```
+
+## Integration with Coordinates
+
+```php
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
+
+// Coordinates automatically uses cache for performance
+$ny = Coordinates::create(40.7128, -74.0060);
+$london = Coordinates::create(51.5074, -0.1278);
+$distance = $ny->distanceTo($london); // Uses cached trigonometric calculations
+
+// View cache performance
+$stats = Coordinates::getCacheStats();
+echo "Cache performance: " . $stats->getHitRatio() * 100 . "% hit ratio";
+```
+
+## Cache Adapters
+
+### ArrayCacheAdapter (Default)
+
+In-memory cache with TTL and LRU eviction:
+
+```php
+$cache = CacheFactory::createArrayCache(
+    namespace: 'my-app',
+    maxItems: 1000
+);
+```
+
+### NullCacheAdapter
+
+No-op cache for testing:
+
+```php
+$cache = CacheFactory::createNullCache('test');
+// All operations are no-ops
+```
+
+## Best Practices
+
+1. **Use Namespaces**: Organize cache keys with meaningful namespaces
+2. **Set Appropriate TTL**: Don't cache frequently changing data
+3. **Monitor Statistics**: Use cache stats to optimize performance
+4. **Handle Cache Misses**: Always handle null returns from cache operations
+5. **Test with Null Cache**: Use null cache adapter in tests to avoid side effects

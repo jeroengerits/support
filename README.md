@@ -1,12 +1,8 @@
-# Support
+# Support Package
 
-A PHP support package with utility classes and value objects for various projects.
+A PHP 8.4+ library providing clean utilities for my personal projects.
 
-## Features
+## Packages
 
-- [Coordinates](src/Coordinates/README.md) - Geographic coordinate handling with strict typing
-
-## Requirements
-
-- PHP ^8.4
-- Composer
+- **[Cache](src/Cache/README.md)** - PSR-16 compliant caching with TTL support and statistics
+- **[Coordinates](src/Coordinates/README.md)** - Geographic coordinates with distance calculations

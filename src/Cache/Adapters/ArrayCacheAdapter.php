@@ -1,0 +1,285 @@
+<?php
+
+declare(strict_types=1);
+
+namespace JeroenGerits\Support\Cache\Adapters;
+
+use JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface;
+use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
+use JeroenGerits\Support\Cache\ValueObjects\CacheKey;
+use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
+use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
+
+/**
+ * In-memory array-based cache adapter with TTL support and LRU eviction.
+ */
+class ArrayCacheAdapter implements CacheAdapterInterface
+{
+    /** @var array<string, array{value: mixed, expires: int}> */
+    private array $cache = [];
+
+    private int $hits = 0;
+
+    private int $misses = 0;
+
+    public function __construct(
+        private readonly string $namespace = 'default',
+        private readonly int $maxItems = 1000
+    ) {
+        $this->validate();
+    }
+
+    /**
+     * Get a value from the cache.
+     *
+     * @param  string $key     The cache key
+     * @param  mixed  $default Default value if key not found
+     * @return mixed  The cached value or default
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        $cacheKey = CacheKey::create($key, $this->namespace);
+        $fullKey = (string) $cacheKey;
+
+        if (! isset($this->cache[$fullKey])) {
+            $this->misses++;
+
+            return $default;
+        }
+
+        $item = $this->cache[$fullKey];
+
+        if ($this->isExpired($item['expires'])) {
+            unset($this->cache[$fullKey]);
+            $this->misses++;
+
+            return $default;
+        }
+
+        $this->hits++;
+
+        return $item['value'];
+    }
+
+    /**
+     * Set a value in the cache.
+     *
+     * @param  string                 $key   The cache key
+     * @param  mixed                  $value The value to cache
+     * @param  null|int|\DateInterval $ttl   Time to live
+     * @return bool                   True on success, false on failure
+     */
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
+    {
+        $cacheKey = CacheKey::create($key, $this->namespace);
+        $fullKey = (string) $cacheKey;
+
+        $expires = $this->calculateExpiration($ttl);
+
+        $this->cache[$fullKey] = [
+            'value' => $value,
+            'expires' => $expires,
+        ];
+
+        $this->evictIfNeeded();
+
+        return true;
+    }
+
+    /**
+     * Delete a value from the cache.
+     *
+     * @param  string $key The cache key
+     * @return bool   True if the key was deleted, false if not found
+     */
+    public function delete(string $key): bool
+    {
+        $cacheKey = CacheKey::create($key, $this->namespace);
+        $fullKey = (string) $cacheKey;
+
+        if (isset($this->cache[$fullKey])) {
+            unset($this->cache[$fullKey]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Clear all values from the cache.
+     *
+     * @return bool True on success, false on failure
+     */
+    public function clear(): bool
+    {
+        $this->cache = [];
+        $this->hits = 0;
+        $this->misses = 0;
+
+        return true;
+    }
+
+    /**
+     * Get multiple values from the cache.
+     *
+     * @param  iterable $keys    Array of keys to retrieve
+     * @param  mixed    $default Default value for missing keys
+     * @return iterable Associative array of key => value pairs
+     */
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
+    {
+        $result = [];
+
+        foreach ($keys as $key) {
+            $result[$key] = $this->get($key, $default);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Set multiple values in the cache.
+     *
+     * @param  iterable               $values Associative array of key => value pairs
+     * @param  null|int|\DateInterval $ttl    Time to live
+     * @return bool                   True on success, false on failure
+     */
+    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
+    {
+        $success = true;
+
+        foreach ($values as $key => $value) {
+            if (! $this->set($key, $value, $ttl)) {
+                $success = false;
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * Delete multiple values from the cache.
+     *
+     * @param  iterable $keys Array of keys to delete
+     * @return bool     True on success, false on failure
+     */
+    public function deleteMultiple(iterable $keys): bool
+    {
+        $success = true;
+
+        foreach ($keys as $key) {
+            if (! $this->delete($key)) {
+                $success = false;
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * Check if a key exists in the cache.
+     *
+     * @param  string $key The cache key
+     * @return bool   True if key exists and is not expired, false otherwise
+     */
+    public function has(string $key): bool
+    {
+        return $this->get($key, '__NOT_FOUND__') !== '__NOT_FOUND__';
+    }
+
+    /**
+     * Get cache statistics.
+     *
+     * @return CacheStatsInterface Current cache statistics
+     */
+    public function getStats(): CacheStatsInterface
+    {
+        return new CacheStats(
+            hits: $this->hits,
+            misses: $this->misses,
+            items: count($this->cache),
+            maxItems: $this->maxItems
+        );
+    }
+
+    /**
+     * Get the cache namespace.
+     *
+     * @return string The cache namespace
+     */
+    public function getNamespace(): string
+    {
+        return $this->namespace;
+    }
+
+    /**
+     * Check if a cache item has expired.
+     *
+     * @param  int  $expires Expiration timestamp
+     * @return bool True if expired, false otherwise
+     */
+    private function isExpired(int $expires): bool
+    {
+        return $expires > 0 && time() > $expires;
+    }
+
+    /**
+     * Calculate expiration timestamp from TTL.
+     *
+     * @param  null|int|\DateInterval $ttl Time to live
+     * @return int                    Expiration timestamp
+     */
+    private function calculateExpiration(null|int|\DateInterval $ttl): int
+    {
+        if ($ttl === null) {
+            return TimeToLive::default()->seconds + time();
+        }
+
+        if ($ttl instanceof \DateInterval) {
+            // Convert DateInterval to seconds manually
+            $seconds = ($ttl->y * 365 * 24 * 3600) +
+                      ($ttl->m * 30 * 24 * 3600) +
+                      ($ttl->d * 24 * 3600) +
+                      ($ttl->h * 3600) +
+                      ($ttl->i * 60) +
+                      $ttl->s;
+
+            return $seconds + time();
+        }
+
+        return $ttl + time();
+    }
+
+    /**
+     * Evict items if cache exceeds maximum size (simple LRU).
+     */
+    private function evictIfNeeded(): void
+    {
+        if (count($this->cache) <= $this->maxItems) {
+            return;
+        }
+
+        // Simple LRU: remove oldest items
+        $itemsToRemove = count($this->cache) - $this->maxItems;
+        $keys = array_keys($this->cache);
+
+        for ($i = 0; $i < $itemsToRemove; $i++) {
+            unset($this->cache[$keys[$i]]);
+        }
+    }
+
+    /**
+     * Validate the cache configuration.
+     */
+    private function validate(): void
+    {
+        if ($this->namespace === '' || $this->namespace === '0') {
+            throw new \InvalidArgumentException('Cache namespace cannot be empty');
+        }
+
+        if ($this->maxItems <= 0) {
+            throw new \InvalidArgumentException('Cache max items must be greater than 0');
+        }
+    }
+}
