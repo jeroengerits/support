@@ -113,16 +113,16 @@ use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 // Calculate distance in kilometers (default)
 $amsterdam = coordinates(52.3676, 4.9041);
 $london = coordinates(51.5074, -0.1278);
-$distanceKm = CoordinatesCalculator::calculateDistance($amsterdam, $london);
+$distanceKm = CoordinatesCalculator::distanceBetween($amsterdam, $london);
 // Result: ~357 km
 
 // Calculate distance in miles
-$distanceMiles = CoordinatesCalculator::calculateDistance($amsterdam, $london, DistanceUnit::MILES);
+$distanceMiles = CoordinatesCalculator::distanceBetween($amsterdam, $london, DistanceUnit::MILES);
 // Result: ~222 miles
 
 // Identical coordinates return 0
 $samePoint = coordinates(40.7128, -74.0060);
-$zeroDistance = CoordinatesCalculator::calculateDistance($samePoint, $samePoint);
+$zeroDistance = CoordinatesCalculator::distanceBetween($samePoint, $samePoint);
 // Result: 0.0
 ```
 

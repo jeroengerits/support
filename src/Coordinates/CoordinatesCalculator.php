@@ -9,7 +9,7 @@ use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 
 class CoordinatesCalculator
 {
-    public static function calculateDistance(Coordinates $a, Coordinates $b, DistanceUnit $unit = DistanceUnit::KILOMETERS): float
+    public static function distanceBetween(Coordinates $a, Coordinates $b, DistanceUnit $unit = DistanceUnit::KILOMETERS): float
     {
         // Early return for identical coordinates
         if ($a->isEqual($b)) {
