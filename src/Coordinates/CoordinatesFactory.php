@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates;
 
 use InvalidArgumentException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -19,7 +18,7 @@ class CoordinatesFactory
      * @param float|int|string|Latitude  $latitude  The latitude value (float, string, int, or Latitude instance)
      * @param float|int|string|Longitude $longitude The longitude value (float, string, int, or Longitude instance)
      *
-     * @throws InvalidArgumentException|InvalidLatitudeException|InvalidLongitudeException When latitude or longitude values are invalid
+     * @throws InvalidArgumentException|InvalidCoordinatesException When latitude or longitude values are invalid
      */
     public static function createCoordinates(float|int|string|Latitude $latitude, float|int|string|Longitude $longitude): Coordinates
     {
@@ -34,7 +33,7 @@ class CoordinatesFactory
      *
      * @param float|int|string|Latitude $value The latitude value (float, string, int, or Latitude instance)
      *
-     * @throws InvalidArgumentException|InvalidLatitudeException When latitude value is invalid
+     * @throws InvalidArgumentException|InvalidCoordinatesException When latitude value is invalid
      */
     public static function createLatitude(float|int|string|Latitude $value): Latitude
     {
@@ -43,10 +42,7 @@ class CoordinatesFactory
             is_string($value) => new Latitude((float) $value),
             is_float($value) => new Latitude($value),
             is_int($value) => new Latitude((float) $value),
-            default => throw InvalidLatitudeException::invalidType(
-                $value,
-                ['expected_types' => ['float', 'int', 'string', 'Latitude'], 'actual_type' => gettype($value)]
-            ),
+            default => throw InvalidCoordinatesException::invalidType($value, 'latitude'),
         };
     }
 
@@ -55,7 +51,7 @@ class CoordinatesFactory
      *
      * @param float|int|string|Longitude $value The longitude value (float, string, int, or Longitude instance)
      *
-     * @throws InvalidArgumentException|InvalidLongitudeException When longitude value is invalid
+     * @throws InvalidArgumentException|InvalidCoordinatesException When longitude value is invalid
      */
     public static function createLongitude(float|int|string|Longitude $value): Longitude
     {
@@ -64,10 +60,7 @@ class CoordinatesFactory
             is_string($value) => new Longitude((float) $value),
             is_float($value) => new Longitude($value),
             is_int($value) => new Longitude((float) $value),
-            default => throw InvalidLongitudeException::invalidType(
-                $value,
-                ['expected_types' => ['float', 'int', 'string', 'Longitude'], 'actual_type' => gettype($value)]
-            ),
+            default => throw InvalidCoordinatesException::invalidType($value, 'longitude'),
         };
     }
 }

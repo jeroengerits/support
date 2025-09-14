@@ -5,25 +5,18 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Contracts\Equatable;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use Stringable;
 
 class Latitude implements Equatable, Stringable
 {
     /**
-     * @throws InvalidLatitudeException
+     * @throws InvalidCoordinatesException
      */
     public function __construct(public float $value)
     {
         if ($value < -90.0 || $value > 90.0) {
-            throw InvalidLatitudeException::outOfRange(
-                $value,
-                [
-                    'min_value' => -90.0,
-                    'max_value' => 90.0,
-                    'provided_value' => $value,
-                ]
-            );
+            throw InvalidCoordinatesException::latitudeOutOfRange($value);
         }
     }
 

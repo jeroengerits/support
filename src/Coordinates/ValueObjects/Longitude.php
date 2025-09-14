@@ -5,25 +5,18 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Contracts\Equatable;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use Stringable;
 
 class Longitude implements Equatable, Stringable
 {
     /**
-     * @throws InvalidLongitudeException
+     * @throws InvalidCoordinatesException
      */
     public function __construct(public float $value)
     {
         if ($value < -180.0 || $value > 180.0) {
-            throw InvalidLongitudeException::outOfRange(
-                $value,
-                [
-                    'min_value' => -180.0,
-                    'max_value' => 180.0,
-                    'provided_value' => $value,
-                ]
-            );
+            throw InvalidCoordinatesException::longitudeOutOfRange($value);
         }
     }
 

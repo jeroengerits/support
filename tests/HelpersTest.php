@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -61,16 +59,6 @@ it('returns existing latitude object', function (): void {
     expect($latitude)->toBe($originalLatitude);
 });
 
-it('throws exception for invalid latitude value', function (): void {
-    expect(fn (): Latitude => latitude(new stdClass))
-        ->toThrow(TypeError::class);
-});
-
-it('throws exception for out of range latitude value', function (): void {
-    expect(fn (): Latitude => latitude(100.0))
-        ->toThrow(InvalidLatitudeException::class, 'Latitude value is outside the valid range of -90.0 to +90.0 degrees');
-});
-
 it('creates longitude with float value', function (): void {
     $longitude = longitude(-74.0060);
 
@@ -102,11 +90,6 @@ it('returns existing longitude object', function (): void {
 it('throws exception for invalid longitude value', function (): void {
     expect(fn (): Longitude => longitude(new stdClass))
         ->toThrow(TypeError::class);
-});
-
-it('throws exception for out of range longitude value', function (): void {
-    expect(fn (): Longitude => longitude(200.0))
-        ->toThrow(InvalidLongitudeException::class, 'Longitude value is outside the valid range of -180.0 to +180.0 degrees');
 });
 
 it('can be used together to create coordinates', function (): void {

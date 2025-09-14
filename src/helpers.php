@@ -6,8 +6,6 @@ use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
 use JeroenGerits\Support\Coordinates\CoordinatesFactory;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -24,9 +22,7 @@ if (! function_exists('coordinates')) {
      * @param  float|int|string|Longitude|null      $longitude The longitude value (optional when $latitude is an array)
      * @return Coordinates                          A new Coordinates instance
      *
-     * @throws InvalidLatitudeException    When latitude value is invalid or out of range
-     * @throws InvalidLongitudeException   When longitude value is invalid or out of range
-     * @throws InvalidCoordinatesException When coordinate values are missing or malformed
+     * @throws InvalidCoordinatesException When coordinate values are invalid, missing, or malformed
      *
      * @example
      * ```php
@@ -48,23 +44,21 @@ if (! function_exists('coordinates')) {
      * $coord5 = coordinates($lat, $lng);
      * ```
      */
-    function coordinates(float|string|array|int|Latitude|null $latitude = null, float|int|string|Longitude|null $longitude = null): Coordinates
-    {
+    function coordinates(
+        float|string|array|int|Latitude|null $latitude = null,
+        float|int|string|Longitude|null $longitude = null
+    ): Coordinates {
         // Handle array input for latitude
         if (is_array($latitude)) {
             $lat = $latitude['lat'] ?? $latitude['latitude'] ?? $latitude[0] ?? null;
             $lng = $latitude['lng'] ?? $latitude['longitude'] ?? $latitude[1] ?? null;
 
-            if ($lat === null || $lng === null) {
-                throw InvalidCoordinatesException::missingValues(
-                    $latitude,
-                    [
-                        'available_keys' => array_keys($latitude),
-                        'expected_keys' => ['lat', 'latitude', 'lng', 'longitude', 0, 1],
-                        'missing_latitude' => $lat === null,
-                        'missing_longitude' => $lng === null,
-                    ]
-                );
+            if ($lat === null && $lng === null) {
+                throw InvalidCoordinatesException::invalidArrayStructure($latitude);
+            } elseif ($lat === null) {
+                throw InvalidCoordinatesException::missingFromArray($latitude, 'latitude');
+            } elseif ($lng === null) {
+                throw InvalidCoordinatesException::missingFromArray($latitude, 'longitude');
             }
 
             return CoordinatesFactory::createCoordinates($lat, $lng);
@@ -84,8 +78,7 @@ if (! function_exists('latitude')) {
      * @param  float|int|string|Latitude $value The latitude value (-90.0 to +90.0 degrees)
      * @return Latitude                  A new Latitude instance
      *
-     * @throws InvalidArgumentException When latitude value type is invalid
-     * @throws InvalidLatitudeException When latitude value is out of range
+     * @throws InvalidCoordinatesException When latitude value is invalid or out of range
      *
      * @example
      * ```php
@@ -119,8 +112,7 @@ if (! function_exists('longitude')) {
      * @param  float|int|string|Longitude $value The longitude value (-180.0 to +180.0 degrees)
      * @return Longitude                  A new Longitude instance
      *
-     * @throws InvalidArgumentException  When longitude value type is invalid
-     * @throws InvalidLongitudeException When longitude value is out of range
+     * @throws InvalidCoordinatesException When longitude value is invalid or out of range
      *
      * @example
      * ```php
