@@ -6,7 +6,7 @@ Geographic coordinate handling with strict typing and high-performance distance 
 
 - **Type Safety**: Strict typing with readonly properties
 - **Distance Calculations**: Haversine formula with multiple Earth models
-- **Performance**: Intelligent caching for trigonometric calculations
+- **Performance**: Optimized calculations with early returns
 - **Validation**: Automatic range validation with clear error messages
 
 ## Quick Start
@@ -51,16 +51,6 @@ $distances = Coordinates::batchDistanceCalculation($pairs);
 // Returns: [5570.9, 431.5] km
 ```
 
-### Cache Management
-
-```php
-// Get cache statistics
-$stats = Coordinates::getCacheStats();
-echo "Hit ratio: " . round($stats->getHitRatio() * 100, 2) . "%";
-
-// Clear cache
-Coordinates::clearCache();
-```
 
 ## Error Handling
 
@@ -86,23 +76,8 @@ $distance = $ny->distanceTo($london, DistanceUnit::KILOMETERS, EarthModel::SPHER
 
 ## Performance
 
-- **Intelligent Caching**: Trigonometric calculations cached automatically using HasCache trait
 - **Early Returns**: Identical coordinates return 0 distance immediately
 - **Batch Processing**: Efficient processing of multiple coordinate pairs
-- **Memory Management**: LRU eviction prevents memory leaks
-- **Instance Caching**: Uses HasCache trait for instance-level caching capabilities
+- **Optimized Calculations**: Direct trigonometric calculations without overhead
+- **Memory Efficient**: No caching overhead for single-use calculations
 
-## HasCache Trait Integration
-
-The Coordinates class demonstrates how to use the HasCache trait for instance-level caching:
-
-```php
-$coordinates = Coordinates::create(40.7128, -74.0060);
-
-// Get cached metadata (demonstrates trait usage)
-$metadata = $coordinates->getCachedMetadata();
-// Returns: ['latitude' => 40.7128, 'longitude' => -74.0060, 'computed_at' => ..., ...]
-
-// Subsequent calls return cached result
-$metadata2 = $coordinates->getCachedMetadata(); // Returns cached version
-```
