@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\ValueObjects;
+namespace JeroenGerits\Support\Coordinates;
 
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use JeroenGerits\Support\Shared\Contracts\Equatable;
 use Stringable;
 

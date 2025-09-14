@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\ValueObjects;
-
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
+namespace JeroenGerits\Support\Coordinates;
 
 /**
  * Value object representing a longitude coordinate.

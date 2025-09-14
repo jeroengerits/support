@@ -1,0 +1,130 @@
+site_name: JeroenGerits\Support
+site_description: PHP Support Package with Utility Classes and Value Objects
+site_url: https://jeroengerits.github.io/support
+repo_url: https://github.com/jeroengerits/support
+repo_name: jeroengerits/support
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - scripts/gen_api.py
+  - autorefs
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+      use_pygments: true
+      css_class: highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: php
+          class: php
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: php-inline
+          class: php-inline
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets:
+      auto_append:
+        - includes/mkdocs.md
+  - pymdownx.critic:
+      mode: html
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: "Link to this section"
+      baselevel: 2
+      toc_depth: 3
+
+nav:
+  - Introduction: index.md
+  - Packages:
+    - Coordinates: packages/coordinates/index.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jeroengerits
+    - icon: fontawesome/brands/php
+      link: https://www.php.net
+  version:
+    provider: mike
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  copyright: Copyright &copy; 2024 Jeroen Gerits
+  generator: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\Enums;
+namespace JeroenGerits\Support\Coordinates;
 
 /**
  * Enum representing different Earth models for distance calculations.

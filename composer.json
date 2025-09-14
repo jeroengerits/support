@@ -42,7 +42,8 @@
     "refactor:dry-run": "rector --dry-run",
     "test": "pest",
     "test:coverage": "pest --coverage",
-    "all": "pint && rector && pest"
+    "docs": "mkdocs build",
+    "all": "pint && rector && pest && mkdocs build"
   },
   "minimum-stability": "stable",
   "prefer-stable": true

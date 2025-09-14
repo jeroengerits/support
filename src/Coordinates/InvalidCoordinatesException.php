@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace JeroenGerits\Support\Coordinates\Exceptions;
+namespace JeroenGerits\Support\Coordinates;
 
 use Exception;
-use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
-use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
 
 /**
  * Exception thrown when invalid coordinates are provided.

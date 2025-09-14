@@ -5,8 +5,8 @@ Geographic coordinate handling with strict typing and high-performance distance 
 ## Quick Start
 
 ```php
-use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
-use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Coordinates\Coordinates;
+use JeroenGerits\Support\Coordinates\DistanceUnit;
 
 // Create coordinates
 $ny = Coordinates::create(40.7128, -74.0060);
@@ -29,8 +29,8 @@ $distanceMiles = $ny->distanceTo($london, DistanceUnit::MILES); // 3459.0 mi
 ### Individual Components
 
 ```php
-use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
-use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
+use JeroenGerits\Support\Coordinates\Latitude;
+use JeroenGerits\Support\Coordinates\Longitude;
 
 $lat = Latitude::create(40.7128);
 $lon = Longitude::create(-74.0060);
@@ -51,7 +51,7 @@ $distances = Coordinates::batchDistanceCalculation($pairs);
 ### Error Handling
 
 ```php
-use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
+use JeroenGerits\Support\Coordinates\InvalidCoordinatesException;
 
 try {
     $lat = Latitude::create(100.0); // Invalid: outside -90 to 90 range
