@@ -32,6 +32,18 @@ class Latitude implements Equatable, Stringable
     }
 
     /**
+     * Create a new Latitude instance from a value.
+     *
+     * @param float $value The latitude value in decimal degrees
+     *
+     * @throws InvalidCoordinatesException When latitude value is invalid
+     */
+    public static function create(float $value): self
+    {
+        return new self($value);
+    }
+
+    /**
      * @return string The latitude as a string
      */
     public function __toString(): string

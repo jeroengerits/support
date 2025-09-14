@@ -32,6 +32,18 @@ class Longitude implements Equatable, Stringable
     }
 
     /**
+     * Create a new Longitude instance from a value.
+     *
+     * @param float $value The longitude value in decimal degrees
+     *
+     * @throws InvalidCoordinatesException When longitude value is invalid
+     */
+    public static function create(float $value): self
+    {
+        return new self($value);
+    }
+
+    /**
      * @return string The longitude as a string
      */
     public function __toString(): string

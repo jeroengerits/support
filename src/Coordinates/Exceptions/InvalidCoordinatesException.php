@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\Exceptions;
 
+use Exception;
+use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
+use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
+
 /**
  * Exception thrown when invalid coordinates are provided.
  */
 class InvalidCoordinatesException extends BaseCoordinatesException
 {
     /**
-     * @param string          $message  The exception message
-     * @param int             $code     The exception code
-     * @param \Exception|null $previous The previous exception for chaining
+     * @param string         $message  The exception message
+     * @param int            $code     The exception code
+     * @param Exception|null $previous The previous exception for chaining
      */
     public function __construct(
         string $message = 'Invalid coordinates provided',
         int $code = self::CODE_INVALID_VALUE,
-        ?\Exception $previous = null
+        ?Exception $previous = null
     ) {
         parent::__construct($message, $code, $previous);
     }
@@ -30,9 +34,9 @@ class InvalidCoordinatesException extends BaseCoordinatesException
     {
         return new static(
             "Latitude value {$value} is outside the valid range of ".
-            \JeroenGerits\Support\Coordinates\ValueObjects\Latitude::MIN_LATITUDE.
+            Latitude::MIN_LATITUDE.
             ' to '.
-            \JeroenGerits\Support\Coordinates\ValueObjects\Latitude::MAX_LATITUDE.
+            Latitude::MAX_LATITUDE.
             ' degrees',
             self::CODE_OUT_OF_RANGE
         );
@@ -46,9 +50,9 @@ class InvalidCoordinatesException extends BaseCoordinatesException
     {
         return new static(
             "Longitude value {$value} is outside the valid range of ".
-            \JeroenGerits\Support\Coordinates\ValueObjects\Longitude::MIN_LONGITUDE.
+            Longitude::MIN_LONGITUDE.
             ' to '.
-            \JeroenGerits\Support\Coordinates\ValueObjects\Longitude::MAX_LONGITUDE.
+            Longitude::MAX_LONGITUDE.
             ' degrees',
             self::CODE_OUT_OF_RANGE
         );

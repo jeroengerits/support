@@ -1,6 +1,7 @@
 # Coordinates
 
-Provides a system for handling geographic coordinates with strict typing, proper validation, and high-performance distance calculations.
+Provides a system for handling geographic coordinates with strict typing, proper validation, and high-performance
+distance calculations.
 
 ## Features
 
@@ -16,11 +17,10 @@ Provides a system for handling geographic coordinates with strict typing, proper
 ### Creating Coordinates
 
 ```php
-use JeroenGerits\Support\Coordinates\CoordinatesFactory;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 
-// Create coordinates using the factory (recommended)
-$coordinates = CoordinatesFactory::createCoordinates(40.7128, -74.0060);
+// Create coordinates using the static factory method (recommended)
+$coordinates = Coordinates::create(40.7128, -74.0060);
 
 // Create coordinates directly (requires Latitude and Longitude objects)
 $coordinates = new Coordinates(
@@ -32,13 +32,12 @@ $coordinates = new Coordinates(
 ### Creating Individual Components
 
 ```php
-use JeroenGerits\Support\Coordinates\CoordinatesFactory;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
 
-// Using factory
-$latitude = CoordinatesFactory::createLatitude(40.7128);
-$longitude = CoordinatesFactory::createLongitude(-74.0060);
+// Using static factory methods
+$latitude = Latitude::create(40.7128);
+$longitude = Longitude::create(-74.0060);
 
 // Direct instantiation
 $latitude = new Latitude(40.7128);
@@ -48,11 +47,12 @@ $longitude = new Longitude(-74.0060);
 ### Distance Calculations
 
 ```php
-use JeroenGerits\Support\Coordinates\CoordinatesFactory;
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Coordinates\Enums\EarthModel;
 
-$amsterdam = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
-$london = CoordinatesFactory::createCoordinates(51.5074, -0.1278);
+$amsterdam = Coordinates::create(52.3676, 4.9041);
+$london = Coordinates::create(51.5074, -0.1278);
 
 // Calculate distance in kilometers (default)
 $distanceKm = $amsterdam->distanceTo($london);
@@ -60,23 +60,19 @@ $distanceKm = $amsterdam->distanceTo($london);
 // Calculate distance in miles
 $distanceMiles = $amsterdam->distanceTo($london, DistanceUnit::MILES);
 
-// Using the calculator directly for advanced options
-use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
-
-$calculator = new CoordinatesCalculator();
-$distance = $calculator->distanceBetween(
-    $amsterdam,
+// Using different Earth models for advanced calculations
+$distance = $amsterdam->distanceTo(
     $london,
     DistanceUnit::KILOMETERS,
-    CoordinatesCalculator::EARTH_MODEL_WGS84
+    EarthModel::WGS84
 );
 ```
 
 ### Equality Comparison
 
 ```php
-$coordinates1 = CoordinatesFactory::createCoordinates(40.7128, -74.0060);
-$coordinates2 = CoordinatesFactory::createCoordinates(40.7128, -74.0060);
+$coordinates1 = Coordinates::create(40.7128, -74.0060);
+$coordinates2 = Coordinates::create(40.7128, -74.0060);
 
 // Check if coordinates are equal
 $isEqual = $coordinates1->isEqual($coordinates2); // true
@@ -85,7 +81,7 @@ $isEqual = $coordinates1->isEqual($coordinates2); // true
 ### String Representation
 
 ```php
-$coordinates = CoordinatesFactory::createCoordinates(40.7128, -74.0060);
+$coordinates = Coordinates::create(40.7128, -74.0060);
 
 // Convert to string
 echo $coordinates; // "40.7128,-74.0060"
@@ -95,32 +91,51 @@ echo $coordinates->longitude; // "-74.0060"
 
 ## Advanced Features
 
+### Earth Models
+
+The package supports different Earth models for distance calculations:
+
+```php
+use JeroenGerits\Support\Coordinates\Enums\EarthModel;
+
+// Available Earth models
+EarthModel::SPHERICAL; // Spherical Earth model with mean radius
+EarthModel::WGS84;     // World Geodetic System 1984
+EarthModel::GRS80;     // Geodetic Reference System 1980
+
+// Get radius values
+$radiusKm = EarthModel::WGS84->getRadiusKm();     // 6371.0088
+$radiusMiles = EarthModel::WGS84->getRadiusMiles(); // 3958.7613
+
+// Get radius for specific distance unit
+$radius = EarthModel::WGS84->getRadius(DistanceUnit::KILOMETERS);
+```
+
 ### Batch Distance Calculations
 
 ```php
-use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
+use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Coordinates\Enums\EarthModel;
 
-$calculator = new CoordinatesCalculator();
 $coordinatePairs = [
-    [CoordinatesFactory::createCoordinates(40.7128, -74.0060), CoordinatesFactory::createCoordinates(51.5074, -0.1278)],
-    [CoordinatesFactory::createCoordinates(52.3676, 4.9041), CoordinatesFactory::createCoordinates(48.8566, 2.3522)],
+    [Coordinates::create(40.7128, -74.0060), Coordinates::create(51.5074, -0.1278)],
+    [Coordinates::create(52.3676, 4.9041), Coordinates::create(48.8566, 2.3522)],
 ];
 
-$distances = $calculator->batchDistanceCalculation($coordinatePairs, DistanceUnit::KILOMETERS);
+$distances = Coordinates::batchDistanceCalculation($coordinatePairs, DistanceUnit::KILOMETERS, EarthModel::WGS84);
 ```
 
 ### Cache Management
 
 ```php
-use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
-
-$calculator = new CoordinatesCalculator();
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 
 // Check cache size
-$cacheSize = CoordinatesCalculator::getCacheSize();
+$cacheSize = Coordinates::getCacheSize();
 
 // Clear cache
-CoordinatesCalculator::clearCache();
+Coordinates::clearCache();
 ```
 
 ## Error Handling
