@@ -46,7 +46,7 @@ class Coordinates implements Equatable, Stringable
      * @param  DistanceUnit $unit   The unit of distance to return
      * @return float        The distance between the two coordinates
      */
-    public function distanceBetween(Coordinates $target, DistanceUnit $unit = DistanceUnit::KILOMETERS): float
+    public function distanceTo(Coordinates $target, DistanceUnit $unit = DistanceUnit::KILOMETERS): float
     {
         return (new CoordinatesCalculator)
             ->distanceBetween($this, $target, $unit);

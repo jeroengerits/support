@@ -55,10 +55,10 @@ $amsterdam = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
 $london = CoordinatesFactory::createCoordinates(51.5074, -0.1278);
 
 // Calculate distance in kilometers (default)
-$distanceKm = $amsterdam->distanceBetween($london);
+$distanceKm = $amsterdam->distanceTo($london);
 
 // Calculate distance in miles
-$distanceMiles = $amsterdam->distanceBetween($london, DistanceUnit::MILES);
+$distanceMiles = $amsterdam->distanceTo($london, DistanceUnit::MILES);
 
 // Using the calculator directly for advanced options
 use JeroenGerits\Support\Coordinates\CoordinatesCalculator;

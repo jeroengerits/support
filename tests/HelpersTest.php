@@ -17,7 +17,7 @@ it('creates coordinates with latitude and longitude using factory', function ():
 it('calculates distance between coordinates using Coordinates objects', function (): void {
     $a = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
     $b = CoordinatesFactory::createCoordinates(52.3736, 4.9101);
-    $distance = $a->distanceBetween($b);
+    $distance = $a->distanceTo($b);
 
     expect($distance)->toBeGreaterThan(0.7)
         ->and($distance)->toBeLessThan(0.9);
@@ -26,7 +26,7 @@ it('calculates distance between coordinates using Coordinates objects', function
 it('calculates distance in miles when specified', function (): void {
     $a = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
     $b = CoordinatesFactory::createCoordinates(52.3736, 4.9101);
-    $distance = $a->distanceBetween($b, DistanceUnit::MILES);
+    $distance = $a->distanceTo($b, DistanceUnit::MILES);
 
     expect($distance)->toBeGreaterThan(0.4)
         ->and($distance)->toBeLessThan(0.6);
@@ -35,7 +35,7 @@ it('calculates distance in miles when specified', function (): void {
 it('returns zero distance for identical coordinates', function (): void {
     $a = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
     $b = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
-    $distance = $a->distanceBetween($b, DistanceUnit::MILES);
+    $distance = $a->distanceTo($b, DistanceUnit::MILES);
 
     expect($distance)->toBe(0.0);
 });
@@ -44,8 +44,8 @@ it('calculates distance with custom distance unit', function (): void {
     $a = CoordinatesFactory::createCoordinates(52.3676, 4.9041);
     $b = CoordinatesFactory::createCoordinates(52.3736, 4.9101);
 
-    $distanceKm = $a->distanceBetween($b, DistanceUnit::KILOMETERS);
-    $distanceMiles = $a->distanceBetween($b, DistanceUnit::MILES);
+    $distanceKm = $a->distanceTo($b, DistanceUnit::KILOMETERS);
+    $distanceMiles = $a->distanceTo($b, DistanceUnit::MILES);
 
     expect($distanceKm)->toBeGreaterThan(0.7)
         ->and($distanceKm)->toBeLessThan(0.9)
