@@ -4,7 +4,7 @@ A PHP support package with utility classes and value objects for various project
 
 ## Documentation
 
-[Home.md](docs/Home.md)
+[Documentation](docs/Home.md)
 
 ## Features
 
