@@ -1,3 +1,12 @@
-# JeroenGerits\Support
+# Support Package
 
-A modern PHP 8.4+ support package providing clean, type-safe utility classes and value objects for common development tasks. Built with strict typing, immutability, and performance in mind.
+A PHP 8.4+ support library providing utility classes, value objects, and external API integrations.
+
+## Features
+
+- [Coordinates](coordinates/index.md) - Geographic calculations
+- [Geocoding](geo/index.md) - Address conversion
+- [Weather](weather/index.md) - Weather data
+- [HTTP Client](http/index.md) - HTTP operations
+- [Shared Utilities](shared/index.md) - Common tools
+- [Examples](examples/index.md) - Usage examples

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\Coordinates;
-use JeroenGerits\Support\Coordinates\DistanceUnit;
-use JeroenGerits\Support\Coordinates\EarthModel;
-use JeroenGerits\Support\Coordinates\InvalidCoordinatesException;
-use JeroenGerits\Support\Coordinates\Latitude;
-use JeroenGerits\Support\Coordinates\Longitude;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
+use JeroenGerits\Support\Coordinates\ValueObjects\DistanceUnit;
+use JeroenGerits\Support\Coordinates\ValueObjects\EarthModel;
+use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
+use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
 
 describe('Coordinates Package', function (): void {
     describe('Coordinates', function (): void {
@@ -243,8 +243,8 @@ describe('Coordinates Package', function (): void {
 
         describe('Validation', function (): void {
             it('throws exception for invalid range', function (): void {
-                expect(fn (): \JeroenGerits\Support\Coordinates\Latitude => new Latitude(100.0))->toThrow(InvalidCoordinatesException::class)
-                    ->and(fn (): \JeroenGerits\Support\Coordinates\Latitude => new Latitude(-100.0))->toThrow(InvalidCoordinatesException::class);
+                expect(fn (): Latitude => new Latitude(100.0))->toThrow(InvalidCoordinatesException::class)
+                    ->and(fn (): Latitude => new Latitude(-100.0))->toThrow(InvalidCoordinatesException::class);
             });
 
             it('throws exception with improved error message', function (): void {
@@ -317,8 +317,8 @@ describe('Coordinates Package', function (): void {
 
         describe('Validation', function (): void {
             it('throws exception for invalid range', function (): void {
-                expect(fn (): \JeroenGerits\Support\Coordinates\Longitude => new Longitude(200.0))->toThrow(InvalidCoordinatesException::class)
-                    ->and(fn (): \JeroenGerits\Support\Coordinates\Longitude => new Longitude(-200.0))->toThrow(InvalidCoordinatesException::class);
+                expect(fn (): Longitude => new Longitude(200.0))->toThrow(InvalidCoordinatesException::class)
+                    ->and(fn (): Longitude => new Longitude(-200.0))->toThrow(InvalidCoordinatesException::class);
             });
 
             it('throws exception with improved error message', function (): void {
