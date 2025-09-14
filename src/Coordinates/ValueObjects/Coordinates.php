@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Contracts\Equatable;
+use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
+use JeroenGerits\Support\Coordinates\CoordinatesFactory;
+use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use Stringable;
 
 class Coordinates implements Equatable, Stringable
@@ -42,8 +45,61 @@ class Coordinates implements Equatable, Stringable
         return $this->longitude->isEqual($other->longitude) && $this->latitude->isEqual($other->latitude);
     }
 
-    public function distanceTo(float|int|string|array|Latitude|null $latitude = null, float|int|string|Longitude|null $longitude = null): float
+    /**
+     * Calculate the distance between two coordinates.
+     *
+     * @param  mixed        $latitude  The latitude value or Coordinates object
+     * @param  mixed        $longitude The longitude value (optional when $latitude is a Coordinates object)
+     * @param  DistanceUnit $unit      The unit of distance to return
+     * @return float        The distance between the two coordinates
+     */
+    public function distanceBetween(mixed $latitude, mixed $longitude = null, DistanceUnit $unit = DistanceUnit::KILOMETERS): float
     {
-        return distanceBetweenCoordinates($this, coordinates($latitude, $longitude));
+        // If first parameter is a Coordinates object, use it directly
+        if ($latitude instanceof Coordinates) {
+            return (new CoordinatesCalculator)
+                ->distanceBetween($this, $latitude, $unit);
+        }
+
+        return (new CoordinatesCalculator)
+            ->distanceBetween($this, CoordinatesFactory::createCoordinates($latitude, $longitude), $unit);
+    }
+
+    /**
+     * Calculate the distance between two coordinates in miles.
+     *
+     * @param  mixed $latitude  The latitude value or Coordinates object
+     * @param  mixed $longitude The longitude value (optional when $latitude is a Coordinates object)
+     * @return float The distance between the two coordinates in miles
+     */
+    public function distanceBetweenInMiles(mixed $latitude, mixed $longitude = null): float
+    {
+        // If first parameter is a Coordinates object, use it directly
+        if ($latitude instanceof Coordinates) {
+            return (new CoordinatesCalculator)
+                ->distanceBetween($this, $latitude, DistanceUnit::MILES);
+        }
+
+        return (new CoordinatesCalculator)
+            ->distanceBetween($this, CoordinatesFactory::createCoordinates($latitude, $longitude), DistanceUnit::MILES);
+    }
+
+    /**
+     * Calculate the distance between two coordinates in kilometers.
+     *
+     * @param  mixed $latitude  The latitude value or Coordinates object
+     * @param  mixed $longitude The longitude value (optional when $latitude is a Coordinates object)
+     * @return float The distance between the two coordinates in kilometers
+     */
+    public function distanceBetweenInKilometers(mixed $latitude, mixed $longitude = null): float
+    {
+        // If first parameter is a Coordinates object, use it directly
+        if ($latitude instanceof Coordinates) {
+            return (new CoordinatesCalculator)
+                ->distanceBetween($this, $latitude, DistanceUnit::KILOMETERS);
+        }
+
+        return (new CoordinatesCalculator)
+            ->distanceBetween($this, CoordinatesFactory::createCoordinates($latitude, $longitude), DistanceUnit::KILOMETERS);
     }
 }

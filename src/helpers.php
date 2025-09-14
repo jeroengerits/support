@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use JeroenGerits\Support\Coordinates\CoordinatesCalculator;
 use JeroenGerits\Support\Coordinates\CoordinatesFactory;
-use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
@@ -18,11 +16,11 @@ if (! function_exists('coordinates')) {
      * from various input types including arrays, individual values, or existing
      * coordinate objects.
      *
-     * @param  float|string|array|int|Latitude|null $latitude  The latitude value or array containing both coordinates
-     * @param  float|int|string|Longitude|null      $longitude The longitude value (optional when $latitude is an array)
-     * @return Coordinates                          A new Coordinates instance
+     * @param  mixed       $latitude  The latitude value or array containing both coordinates
+     * @param  mixed       $longitude The longitude value (optional when $latitude is an array)
+     * @return Coordinates A new Coordinates instance
      *
-     * @throws InvalidCoordinatesException When coordinate values are invalid, missing, or malformed
+     * @throws InvalidCoordinatesException
      *
      * @example
      * ```php
@@ -44,10 +42,8 @@ if (! function_exists('coordinates')) {
      * $coord5 = coordinates($lat, $lng);
      * ```
      */
-    function coordinates(
-        float|string|array|int|Latitude|null $latitude = null,
-        float|int|string|Longitude|null $longitude = null
-    ): Coordinates {
+    function coordinates(mixed $latitude = null, mixed $longitude = null): Coordinates
+    {
         return CoordinatesFactory::createCoordinates($latitude, $longitude);
     }
 }
@@ -59,8 +55,8 @@ if (! function_exists('latitude')) {
      * This helper function provides a convenient way to create latitude objects
      * from various input types with automatic validation and type conversion.
      *
-     * @param  float|int|string|Latitude $value The latitude value (-90.0 to +90.0 degrees)
-     * @return Latitude                  A new Latitude instance
+     * @param  mixed    $value The latitude value (-90.0 to +90.0 degrees)
+     * @return Latitude A new Latitude instance
      *
      * @throws InvalidCoordinatesException When latitude value is invalid or out of range
      *
@@ -80,7 +76,7 @@ if (! function_exists('latitude')) {
      * $lat4 = latitude($existingLat); // Returns the same object
      * ```
      */
-    function latitude(float|int|string|Latitude $value): Latitude
+    function latitude(mixed $value = null): Latitude
     {
         return CoordinatesFactory::createLatitude($value);
     }
@@ -93,8 +89,8 @@ if (! function_exists('longitude')) {
      * This helper function provides a convenient way to create longitude objects
      * from various input types with automatic validation and type conversion.
      *
-     * @param  float|int|string|Longitude $value The longitude value (-180.0 to +180.0 degrees)
-     * @return Longitude                  A new Longitude instance
+     * @param  mixed     $value The longitude value (-180.0 to +180.0 degrees)
+     * @return Longitude A new Longitude instance
      *
      * @throws InvalidCoordinatesException When longitude value is invalid or out of range
      *
@@ -114,50 +110,8 @@ if (! function_exists('longitude')) {
      * $lng4 = longitude($existingLng); // Returns the same object
      * ```
      */
-    function longitude(float|int|string|Longitude $value): Longitude
+    function longitude(mixed $value = null): Longitude
     {
         return CoordinatesFactory::createLongitude($value);
-    }
-}
-
-if (! function_exists('distanceBetweenCoordinates')) {
-    /**
-     * Calculate the distance between two coordinates using the Haversine formula.
-     *
-     * This helper function provides a convenient way to calculate distances
-     * between coordinate objects using the optimized Haversine formula with
-     * caching and multiple Earth model support.
-     *
-     * @param  Coordinates  $a    The first coordinate
-     * @param  Coordinates  $b    The second coordinate
-     * @param  DistanceUnit $unit The distance unit (default: KILOMETERS)
-     * @return float        The distance between the coordinates
-     *
-     * @example
-     * ```php
-     * // Calculate distance between New York and London
-     * $ny = coordinates(40.7128, -74.0060);
-     * $london = coordinates(51.5074, -0.1278);
-     * $distance = distanceBetweenCoordinates($ny, $london, DistanceUnit::KILOMETERS);
-     * // Returns: ~5570.0 km
-     *
-     * // Calculate distance in miles
-     * $distanceMiles = distanceBetweenCoordinates($ny, $london, DistanceUnit::MILES);
-     * // Returns: ~3458.0 miles
-     *
-     * // Calculate distance between identical coordinates
-     * $same = coordinates(40.7128, -74.0060);
-     * $zeroDistance = distanceBetweenCoordinates($same, $same);
-     * // Returns: 0.0
-     * ```
-     */
-    function distanceBetweenCoordinates(
-        Coordinates $a,
-        Coordinates $b,
-        DistanceUnit $unit = DistanceUnit::KILOMETERS
-    ): float {
-        $calculator = new CoordinatesCalculator;
-
-        return $calculator->distanceBetween($a, $b, $unit);
     }
 }

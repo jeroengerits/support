@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 use JeroenGerits\Support\Coordinates\ValueObjects\Longitude;
@@ -89,7 +90,7 @@ it('returns existing longitude object', function (): void {
 
 it('throws exception for invalid longitude value', function (): void {
     expect(fn (): Longitude => longitude(new stdClass))
-        ->toThrow(TypeError::class);
+        ->toThrow(InvalidCoordinatesException::class);
 });
 
 it('can be used together to create coordinates', function (): void {
@@ -116,7 +117,7 @@ it('can be chained for fluent creation', function (): void {
 it('calculates distance between coordinates using Coordinates objects', function (): void {
     $a = coordinates(52.3676, 4.9041);
     $b = coordinates(52.3736, 4.9101);
-    $distance = distanceBetweenCoordinates($a, $b);
+    $distance = $a->distanceBetween($b);
 
     expect($distance)->toBeGreaterThan(0.7)
         ->and($distance)->toBeLessThan(0.9);
@@ -125,7 +126,7 @@ it('calculates distance between coordinates using Coordinates objects', function
 it('calculates distance in miles when specified', function (): void {
     $a = coordinates(52.3676, 4.9041);
     $b = coordinates(52.3736, 4.9101);
-    $distance = distanceBetweenCoordinates($a, $b, DistanceUnit::MILES);
+    $distance = $a->distanceBetweenInMiles($b);
 
     expect($distance)->toBeGreaterThan(0.4)
         ->and($distance)->toBeLessThan(0.6);
@@ -134,7 +135,62 @@ it('calculates distance in miles when specified', function (): void {
 it('returns zero distance for identical coordinates', function (): void {
     $a = coordinates(52.3676, 4.9041);
     $b = coordinates(52.3676, 4.9041);
-    $distance = distanceBetweenCoordinates($a, $b);
+    $distance = $a->distanceBetweenInMiles($b);
 
     expect($distance)->toBe(0.0);
+});
+
+it('calculates distance with individual latitude and longitude parameters', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $distance = $a->distanceBetween(52.3736, 4.9101);
+
+    expect($distance)->toBeGreaterThan(0.7)
+        ->and($distance)->toBeLessThan(0.9);
+});
+
+it('calculates distance with string parameters', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $distance = $a->distanceBetween('52.3736', '4.9101');
+
+    expect($distance)->toBeGreaterThan(0.7)
+        ->and($distance)->toBeLessThan(0.9);
+});
+
+it('calculates distance with array parameter', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $distance = $a->distanceBetween(['lat' => 52.3736, 'lng' => 4.9101]);
+
+    expect($distance)->toBeGreaterThan(0.7)
+        ->and($distance)->toBeLessThan(0.9);
+});
+
+it('handles invalid string parameters by converting them to zero', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+
+    // Invalid string parameters get converted to 0.0 by PHP's (float) cast
+    $distance1 = $a->distanceBetween('invalid_latitude', 4.9101);
+    $distance2 = $a->distanceBetween(52.3736, 'invalid_longitude');
+
+    // Both should return valid distances (not throw exceptions)
+    expect($distance1)->toBeGreaterThan(0)
+        ->and($distance2)->toBeGreaterThan(0);
+});
+
+it('throws exception when distance method receives invalid array parameter', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+
+    expect(fn (): float => $a->distanceBetween(['invalid' => 'structure']))
+        ->toThrow(InvalidCoordinatesException::class);
+});
+
+it('calculates distance with custom distance unit', function (): void {
+    $a = coordinates(52.3676, 4.9041);
+    $b = coordinates(52.3736, 4.9101);
+
+    $distanceKm = $a->distanceBetween($b, null, DistanceUnit::KILOMETERS);
+    $distanceMiles = $a->distanceBetween($b, null, DistanceUnit::MILES);
+
+    expect($distanceKm)->toBeGreaterThan(0)
+        ->and($distanceMiles)->toBeGreaterThan(0)
+        ->and($distanceKm)->toBeGreaterThan($distanceMiles);
 });

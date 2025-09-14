@@ -15,12 +15,12 @@ class CoordinatesFactory
     /**
      * Create a new Coordinates instance from latitude and longitude values.
      *
-     * @param float|int|string|array|Latitude|null $latitude  The latitude value or array containing both coordinates
-     * @param float|int|string|Longitude|null      $longitude The longitude value (optional when $latitude is an array)
+     * @param mixed $latitude  The latitude value or array containing both coordinates
+     * @param mixed $longitude The longitude value (optional when $latitude is an array)
      *
      * @throws InvalidArgumentException|InvalidCoordinatesException When latitude or longitude values are invalid
      */
-    public static function createCoordinates(float|int|string|array|Latitude|null $latitude = null, float|int|string|Longitude|null $longitude = null): Coordinates
+    public static function createCoordinates(mixed $latitude = null, mixed $longitude = null): Coordinates
     {
         // Handle array input for latitude
         if (is_array($latitude)) {
@@ -62,18 +62,17 @@ class CoordinatesFactory
     /**
      * Create a new Latitude instance from various input types.
      *
-     * @param float|int|string|Latitude|null $value The latitude value (float, string, int, or Latitude instance)
+     * @param mixed $value The latitude value (float, string, int, or Latitude instance)
      *
      * @throws InvalidArgumentException|InvalidCoordinatesException When latitude value is invalid
      */
-    public static function createLatitude(float|int|string|Latitude|null $value): Latitude
+    public static function createLatitude(mixed $value): Latitude
     {
         return match (true) {
             $value instanceof Latitude => $value,
-            is_string($value) => new Latitude((float) $value),
+            is_string($value), is_int($value) => new Latitude((float) $value),
             is_float($value) => new Latitude($value),
-            is_int($value) => new Latitude((float) $value),
-            $value === null => throw InvalidCoordinatesException::missingFromArray([], 'latitude'),
+            $value === null => throw InvalidCoordinatesException::invalidType(null, 'latitude'),
             default => throw InvalidCoordinatesException::invalidType($value, 'latitude'),
         };
     }
@@ -81,18 +80,17 @@ class CoordinatesFactory
     /**
      * Create a new Longitude instance from various input types.
      *
-     * @param float|int|string|Longitude|null $value The longitude value (float, string, int, or Longitude instance)
+     * @param mixed $value The longitude value (float, string, int, or Longitude instance)
      *
      * @throws InvalidArgumentException|InvalidCoordinatesException When longitude value is invalid
      */
-    public static function createLongitude(float|int|string|Longitude|null $value): Longitude
+    public static function createLongitude(mixed $value): Longitude
     {
         return match (true) {
             $value instanceof Longitude => $value,
-            is_string($value) => new Longitude((float) $value),
+            is_string($value), is_int($value) => new Longitude((float) $value),
             is_float($value) => new Longitude($value),
-            is_int($value) => new Longitude((float) $value),
-            $value === null => throw InvalidCoordinatesException::missingFromArray([], 'longitude'),
+            $value === null => throw InvalidCoordinatesException::invalidType(null, 'longitude'),
             default => throw InvalidCoordinatesException::invalidType($value, 'longitude'),
         };
     }
