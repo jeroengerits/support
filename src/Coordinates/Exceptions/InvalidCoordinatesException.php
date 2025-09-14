@@ -81,21 +81,6 @@ class InvalidCoordinatesException extends BaseCoordinatesException
      * @param  string $value          The invalid format string that was provided
      * @param  string $coordinateType The type of coordinate (latitude, longitude, or coordinate)
      * @return static A new InvalidCoordinatesException instance
-     *
-     * @example
-     * ```php
-     * // Invalid latitude format
-     * throw InvalidCoordinatesException::invalidFormat('40° 42\' 46" N', 'latitude');
-     * // Message: "Invalid latitude format: '40° 42\' 46" N'. Expected decimal degrees (e.g., '40.7128')"
-     *
-     * // Invalid longitude format
-     * throw InvalidCoordinatesException::invalidFormat('74° 0\' 22" W', 'longitude');
-     * // Message: "Invalid longitude format: '74° 0\' 22" W'. Expected decimal degrees (e.g., '-74.0060')"
-     *
-     * // Invalid coordinate format (default)
-     * throw InvalidCoordinatesException::invalidFormat('not a number');
-     * // Message: "Invalid coordinate format: 'not a number'. Expected decimal degrees (e.g., '-74.0060')"
-     * ```
      */
     public static function invalidFormat(string $value, string $coordinateType = 'coordinate'): static
     {

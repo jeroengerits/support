@@ -15,7 +15,6 @@ use Stringable;
  */
 class Coordinates implements Equatable, Stringable
 {
-    /** Cache key prefixes for different trigonometric functions. */
     private const string RADIANS_CACHE_PREFIX = 'rad_';
 
     private const string SINE_CACHE_PREFIX = 'sin_';
