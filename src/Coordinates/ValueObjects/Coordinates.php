@@ -7,7 +7,6 @@ namespace JeroenGerits\Support\Coordinates\ValueObjects;
 use JeroenGerits\Support\Cache\CacheFactory;
 use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
 use JeroenGerits\Support\Cache\Traits\HasCache;
-use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Enums\EarthModel;
@@ -88,18 +87,6 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Clear all caches and reset to default.
-     *
-     * This method clears the cache and resets it to the default configuration.
-     * Use this when memory usage becomes a concern or when you want to
-     * reset the cache for testing purposes.
-     */
-    public static function clearCache(): void
-    {
-        self::getCache()->clear();
-    }
-
-    /**
      * Get the current cache adapter.
      *
      * @return CacheAdapter The cache adapter
@@ -114,40 +101,6 @@ class Coordinates implements Equatable, Stringable
         }
 
         return self::$staticCache;
-    }
-
-    /**
-     * Get cache statistics.
-     *
-     * @return CacheStats Current cache statistics
-     */
-    public static function getCacheStats(): CacheStats
-    {
-        return self::getCache()->getStats();
-    }
-
-    /**
-     * Get the current size of the cache.
-     *
-     * @return int The number of cached items
-     *
-     * @deprecated Use getCacheStats()->getItems() instead
-     */
-    public static function getCacheSize(): int
-    {
-        return self::getCache()->getStats()->getItems();
-    }
-
-    /**
-     * Get the current size of the Earth radius cache.
-     *
-     * @return int The number of cached Earth radius values
-     *
-     * @deprecated Use getCacheStats()->getItems() instead
-     */
-    public static function getEarthRadiusCacheSize(): int
-    {
-        return self::getCache()->getStats()->getItems();
     }
 
     /**

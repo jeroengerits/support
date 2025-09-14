@@ -226,8 +226,8 @@ describe('Coordinates Package', function (): void {
         describe('Cache', function (): void {
             it('manages trigonometric cache', function (): void {
                 // Clear cache first
-                Coordinates::clearCache();
-                expect(Coordinates::getCacheSize())->toBe(0);
+                Coordinates::getCache()->clear();
+                expect(Coordinates::getCache()->getStats()->getItems())->toBe(0);
 
                 // Perform some calculations to populate cache
                 $point1 = Coordinates::create(40.7128, -74.0060);
@@ -235,17 +235,17 @@ describe('Coordinates Package', function (): void {
                 $point1->distanceTo($point2);
 
                 // Cache should now have entries
-                expect(Coordinates::getCacheSize())->toBeGreaterThan(0);
+                expect(Coordinates::getCache()->getStats()->getItems())->toBeGreaterThan(0);
 
                 // Clear cache again
-                Coordinates::clearCache();
-                expect(Coordinates::getCacheSize())->toBe(0);
+                Coordinates::getCache()->clear();
+                expect(Coordinates::getCache()->getStats()->getItems())->toBe(0);
             });
 
             it('manages Earth radius cache separately', function (): void {
                 // Clear cache first
-                Coordinates::clearCache();
-                expect(Coordinates::getEarthRadiusCacheSize())->toBe(0);
+                Coordinates::getCache()->clear();
+                expect(Coordinates::getCache()->getStats()->getItems())->toBe(0);
 
                 // Perform calculations with different Earth models and units
                 $point1 = Coordinates::create(40.7128, -74.0060);
@@ -256,33 +256,32 @@ describe('Coordinates Package', function (): void {
                 $point1->distanceTo($point2, DistanceUnit::KILOMETERS, EarthModel::SPHERICAL);
 
                 // Earth radius cache should have entries
-                expect(Coordinates::getEarthRadiusCacheSize())->toBeGreaterThan(0);
+                expect(Coordinates::getCache()->getStats()->getItems())->toBeGreaterThan(0);
 
                 // Clear cache again
-                Coordinates::clearCache();
-                expect(Coordinates::getEarthRadiusCacheSize())->toBe(0);
+                Coordinates::getCache()->clear();
+                expect(Coordinates::getCache()->getStats()->getItems())->toBe(0);
             });
 
             it('caches are independent', function (): void {
                 // Clear cache first
-                Coordinates::clearCache();
+                Coordinates::getCache()->clear();
 
                 // Perform calculations
                 $point1 = Coordinates::create(40.7128, -74.0060);
                 $point2 = Coordinates::create(51.5074, -0.1278);
                 $point1->distanceTo($point2);
 
-                $trigCacheSize = Coordinates::getCacheSize();
-                $radiusCacheSize = Coordinates::getEarthRadiusCacheSize();
+                $trigCacheSize = Coordinates::getCache()->getStats()->getItems();
+                $radiusCacheSize = Coordinates::getCache()->getStats()->getItems();
 
                 // Both caches should have entries
                 expect($trigCacheSize)->toBeGreaterThan(0)
                     ->and($radiusCacheSize)->toBeGreaterThan(0);
 
                 // Clear only trigonometric cache
-                Coordinates::clearCache();
-                expect(Coordinates::getCacheSize())->toBe(0)
-                    ->and(Coordinates::getEarthRadiusCacheSize())->toBe(0); // Both are cleared
+                Coordinates::getCache()->clear();
+                expect(Coordinates::getCache()->getStats()->getItems())->toBe(0); // Both are cleared
             });
 
             it('demonstrates HasCache trait usage with getCachedMetadata', function (): void {
@@ -290,17 +289,18 @@ describe('Coordinates Package', function (): void {
 
                 // First call - should compute and cache
                 $metadata1 = $coordinates->getCachedMetadata();
-                expect($metadata1)->toBeArray();
-                expect($metadata1['latitude'])->toBe(40.7128);
-                expect($metadata1['longitude'])->toBe(-74.0060);
-                expect($metadata1['string_representation'])->toBe('40.7128,-74.006');
-                expect($metadata1)->toHaveKey('computed_at');
-                expect($metadata1)->toHaveKey('hash');
+                expect($metadata1)->toBeArray()
+                    ->and($metadata1['latitude'])->toBe(40.7128)
+                    ->and($metadata1['longitude'])->toBe(-74.0060)
+                    ->and($metadata1['string_representation'])->toBe('40.7128,-74.006')
+                    ->and($metadata1)->toHaveKey('computed_at')
+                    ->and($metadata1)->toHaveKey('hash');
 
                 // Second call - should return cached result
                 $metadata2 = $coordinates->getCachedMetadata();
-                expect($metadata1['computed_at'])->toBe($metadata2['computed_at']); // Same timestamp = cached
-                expect($metadata1)->toBe($metadata2); // Identical arrays
+                expect($metadata1['computed_at'])->toBe($metadata2['computed_at'])
+                    ->and($metadata1)->toBe($metadata2); // Same timestamp = cached
+                // Identical arrays
             });
         });
     });

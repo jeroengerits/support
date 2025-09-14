@@ -3,7 +3,13 @@
 declare(strict_types=1);
 
 use JeroenGerits\Support\Cache\CacheFactory;
+use JeroenGerits\Support\Cache\Exceptions\InvalidCacheKeyException;
+use JeroenGerits\Support\Cache\Exceptions\InvalidTimeToLiveException;
+use JeroenGerits\Support\Cache\Traits\HasCache;
+use JeroenGerits\Support\Cache\ValueObjects\CacheKey;
+use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
+use JeroenGerits\Support\Coordinates\ValueObjects\Coordinates;
 
 describe('Cache Package', function (): void {
     describe('ArrayCacheAdapter', function (): void {
@@ -182,13 +188,13 @@ describe('Cache Package', function (): void {
         });
 
         it('validates non-negative values', function (): void {
-            expect(fn (): \JeroenGerits\Support\Cache\ValueObjects\TimeToLive => new TimeToLive(-1))->toThrow(\JeroenGerits\Support\Cache\Exceptions\InvalidTimeToLiveException::class);
+            expect(fn (): TimeToLive => new TimeToLive(-1))->toThrow(InvalidTimeToLiveException::class);
         });
     });
 
     describe('CacheKey Value Object', function (): void {
         it('creates with key and namespace', function (): void {
-            $key = \JeroenGerits\Support\Cache\ValueObjects\CacheKey::create('test-key', 'namespace');
+            $key = CacheKey::create('test-key', 'namespace');
 
             expect($key->key)->toBe('test-key');
             expect($key->namespace)->toBe('namespace');
@@ -196,19 +202,19 @@ describe('Cache Package', function (): void {
         });
 
         it('validates non-empty key', function (): void {
-            expect(fn (): \JeroenGerits\Support\Cache\ValueObjects\CacheKey => \JeroenGerits\Support\Cache\ValueObjects\CacheKey::create('', 'namespace'))
-                ->toThrow(\JeroenGerits\Support\Cache\Exceptions\InvalidCacheKeyException::class);
+            expect(fn (): CacheKey => CacheKey::create('', 'namespace'))
+                ->toThrow(InvalidCacheKeyException::class);
         });
 
         it('validates key without colons', function (): void {
-            expect(fn (): \JeroenGerits\Support\Cache\ValueObjects\CacheKey => \JeroenGerits\Support\Cache\ValueObjects\CacheKey::create('key:with:colons', 'namespace'))
-                ->toThrow(\JeroenGerits\Support\Cache\Exceptions\InvalidCacheKeyException::class);
+            expect(fn (): CacheKey => CacheKey::create('key:with:colons', 'namespace'))
+                ->toThrow(InvalidCacheKeyException::class);
         });
     });
 
     describe('CacheStats Value Object', function (): void {
         it('calculates hit ratio correctly', function (): void {
-            $stats = \JeroenGerits\Support\Cache\ValueObjects\CacheStats::create(8, 2, 5, 10);
+            $stats = CacheStats::create(8, 2, 5, 10);
 
             expect($stats->getHitRatio())->toBe(0.8);
             expect($stats->getTotalRequests())->toBe(10);
@@ -216,22 +222,22 @@ describe('Cache Package', function (): void {
         });
 
         it('handles zero requests', function (): void {
-            $stats = \JeroenGerits\Support\Cache\ValueObjects\CacheStats::create(0, 0, 0, 10);
+            $stats = CacheStats::create(0, 0, 0, 10);
 
             expect($stats->getHitRatio())->toBe(0.0);
             expect($stats->getTotalRequests())->toBe(0);
         });
 
         it('validates stats values', function (): void {
-            expect(fn (): \JeroenGerits\Support\Cache\ValueObjects\CacheStats => \JeroenGerits\Support\Cache\ValueObjects\CacheStats::create(-1, 0, 0, 10))
+            expect(fn (): CacheStats => CacheStats::create(-1, 0, 0, 10))
                 ->toThrow(InvalidArgumentException::class);
         });
     });
 
     describe('Integration with Coordinates', function (): void {
         it('uses cache for trigonometric calculations', function (): void {
-            $amsterdam = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::create(52.3676, 4.9041);
-            $london = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::create(51.5074, -0.1278);
+            $amsterdam = Coordinates::create(52.3676, 4.9041);
+            $london = Coordinates::create(51.5074, -0.1278);
 
             // First calculation - should populate cache
             $distance1 = $amsterdam->distanceTo($london);
@@ -241,27 +247,27 @@ describe('Cache Package', function (): void {
 
             expect($distance1)->toBe($distance2);
 
-            $stats = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::getCacheStats();
+            $stats = Coordinates::getCache()->getStats();
             expect($stats->getHits())->toBeGreaterThan(0);
         });
 
         it('allows custom cache configuration', function (): void {
             $nullCache = CacheFactory::createNullCache('test');
-            \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::setCache($nullCache);
+            Coordinates::setCache($nullCache);
 
-            $amsterdam = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::create(52.3676, 4.9041);
-            $london = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::create(51.5074, -0.1278);
+            $amsterdam = Coordinates::create(52.3676, 4.9041);
+            $london = Coordinates::create(51.5074, -0.1278);
 
             $distance = $amsterdam->distanceTo($london);
             expect($distance)->toBeGreaterThan(0);
 
             // With null cache, all operations should be cache misses
-            $stats = \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::getCacheStats();
+            $stats = Coordinates::getCache()->getStats();
             expect($stats->getHits())->toBe(0);
             expect($stats->getItems())->toBe(0);
 
             // Reset to default cache
-            \JeroenGerits\Support\Coordinates\ValueObjects\Coordinates::setCache(null);
+            Coordinates::setCache(null);
         });
     });
 
@@ -271,7 +277,7 @@ describe('Cache Package', function (): void {
          */
         class TestCachedClass
         {
-            use \JeroenGerits\Support\Cache\Traits\HasCache;
+            use HasCache;
 
             public function __construct(
                 private readonly string $id
@@ -370,7 +376,7 @@ describe('Cache Package', function (): void {
                 $this->cachedClass->setCacheNamespace(null);
 
                 expect(fn (): string => $this->cachedClass->testGenerateCacheKey('test'))
-                    ->toThrow(\RuntimeException::class, 'Cache namespace must be set before generating cache keys');
+                    ->toThrow(RuntimeException::class, 'Cache namespace must be set before generating cache keys');
             });
         });
 
@@ -417,7 +423,7 @@ describe('Cache Package', function (): void {
             });
 
             it('uses DateInterval TTL', function (): void {
-                $interval = new \DateInterval('PT1S'); // 1 second
+                $interval = new DateInterval('PT1S'); // 1 second
                 $result = $this->cachedClass->testCacheSet('test-key', 'test-value', $interval);
 
                 expect($result)->toBeTrue();
