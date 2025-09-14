@@ -62,7 +62,7 @@ describe('Shared Domain', function (): void {
                     $counter++;
 
                     throw new Exception("Attempt {$counter} failed");
-                }, maxAttempts: 2);
+                }, maxAttempts: 2, baseDelay: 0.001); // Use 1ms delay instead of 1s
                 expect(false)->toBeTrue('Expected exception was not thrown');
             } catch (Exception $e) {
                 expect($e->getMessage())->toBe('Attempt 2 failed');
@@ -79,7 +79,7 @@ describe('Shared Domain', function (): void {
                     $counter++;
 
                     throw new Exception("Attempt {$counter} failed");
-                }, maxAttempts: 5);
+                }, maxAttempts: 5, baseDelay: 0.001); // Use 1ms delay instead of 1s
                 expect(false)->toBeTrue('Expected exception was not thrown');
             } catch (Exception $e) {
                 expect($e->getMessage())->toBe('Attempt 5 failed');
@@ -97,7 +97,7 @@ describe('Shared Domain', function (): void {
                     $counter++;
 
                     throw new Exception("Attempt {$counter} failed");
-                }, maxAttempts: 2, baseDelay: 0.1);
+                }, maxAttempts: 2, baseDelay: 0.01); // Use 10ms delay instead of 100ms
                 expect(false)->toBeTrue('Expected exception was not thrown');
             } catch (Exception $e) {
                 expect($e->getMessage())->toBe('Attempt 2 failed');
@@ -106,7 +106,7 @@ describe('Shared Domain', function (): void {
             $endTime = microtime(true);
             $duration = $endTime - $startTime;
 
-            expect($duration)->toBeGreaterThan(0.1); // Should have at least the base delay
+            expect($duration)->toBeGreaterThan(0.01); // Should have at least the base delay
         });
 
         it('handles different exception types', function (): void {

@@ -98,8 +98,6 @@ nav:
     - Geo: geo/index.md
     - Weather: weather/index.md
     - HTTP: http/index.md
-    - Shared: shared/index.md
-  - Examples: examples/index.md
 
 extra:
   social:

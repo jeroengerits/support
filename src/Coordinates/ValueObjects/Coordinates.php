@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Shared\Contracts\Equatable;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
 use Stringable;
 
 /**
