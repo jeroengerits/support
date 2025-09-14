@@ -1,11 +1,10 @@
-site_name: JeroenGerits\Support
+site_name: Support
 site_description: PHP Support Package with Utility Classes and Value Objects
-site_url: https://jeroengerits.github.io/support
 repo_url: https://github.com/jeroengerits/support
 repo_name: jeroengerits/support
 
 theme:
-  name: material
+  name: readthedocs
   palette:
     - scheme: default
       primary: indigo
@@ -33,9 +32,6 @@ theme:
 
 plugins:
   - search
-  - gen-files:
-      scripts:
-        - scripts/gen_api.py
   - autorefs
   - git-revision-date-localized:
       enable_creation_date: true
@@ -99,6 +95,8 @@ nav:
   - Introduction: index.md
   - Packages:
     - Coordinates: packages/coordinates/index.md
+  - Shared:
+    - Contracts: shared/contracts.md
 
 extra:
   social:

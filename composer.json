@@ -43,6 +43,7 @@
     "test": "pest",
     "test:coverage": "pest --coverage",
     "docs": "mkdocs build",
+    "docs:serve": "mkdocs serve --dev-addr=0.0.0.0:8008",
     "all": "pint && rector && pest && mkdocs build"
   },
   "minimum-stability": "stable",
