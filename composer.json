@@ -46,7 +46,7 @@
     "refactor:dry-run": "rector --dry-run",
     "test": "pest",
     "test:coverage": "pest --coverage",
-    "docs": "php phpdoc.phar -d src -t docs --title=\"Support\" --template=\"vendor/saggre/phpdocumentor-markdown/themes/markdown\" --defaultpackagename=\"JeroenGerits\\Support\" docs",
+    "docs": "php phpdoc.phar -d src -t docs --title=\"Support\" --template=\"vendor/saggre/phpdocumentor-markdown/themes/markdown\" docs",
     "docs:clean": "rm -rf docs",
     "all": "pint && rector && pest && composer docs"
   },
