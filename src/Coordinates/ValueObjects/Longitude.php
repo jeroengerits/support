@@ -4,71 +4,69 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use JeroenGerits\Support\Contracts\Equatable;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-use Stringable;
 
 /**
  * Value object representing a longitude coordinate.
+ *
+ * Longitude values range from -180.0° (International Date Line West) to +180.0° (International Date Line East).
+ * This class provides immutable longitude objects with automatic validation.
+ *
+ * @example
+ * ```php
+ * $longitude = Longitude::create(-74.0060); // New York longitude
+ * echo $longitude; // "-74.0060"
+ * ```
  */
-class Longitude implements Equatable, Stringable
+class Longitude extends AbstractCoordinate
 {
-    /** Minimum valid longitude value in decimal degrees. */
+    /** Minimum valid longitude value in decimal degrees (International Date Line West). */
     public const float MIN_LONGITUDE = -180.0;
 
-    /** Maximum valid longitude value in decimal degrees. */
+    /** Maximum valid longitude value in decimal degrees (International Date Line East). */
     public const float MAX_LONGITUDE = 180.0;
 
     /**
-     * @param float $value The longitude value in decimal degrees (-180.0 to +180.0)
+     * Validate the longitude value.
+     *
+     * @param float $value The longitude value to validate
      *
      * @throws InvalidCoordinatesException When longitude value is outside valid range
      */
-    public function __construct(public float $value)
+    protected function validateValue(float $value): void
     {
         if ($value < self::MIN_LONGITUDE || $value > self::MAX_LONGITUDE) {
-            throw InvalidCoordinatesException::longitudeOutOfRange($value);
+            throw $this->createOutOfRangeException($value);
         }
     }
 
     /**
-     * Create a new Longitude instance from a value.
+     * Get the minimum valid value for longitude.
      *
-     * @param float $value The longitude value in decimal degrees
+     * @return float The minimum valid longitude value (-180.0)
+     */
+    protected function getMinValue(): float
+    {
+        return self::MIN_LONGITUDE;
+    }
+
+    /**
+     * Get the maximum valid value for longitude.
      *
-     * @throws InvalidCoordinatesException When longitude value is invalid
+     * @return float The maximum valid longitude value (180.0)
      */
-    public static function create(float $value): self
+    protected function getMaxValue(): float
     {
-        return new self($value);
+        return self::MAX_LONGITUDE;
     }
 
     /**
-     * @return string The longitude as a string
+     * Get the name of this coordinate type for error messages.
+     *
+     * @return string The coordinate type name ("Longitude")
      */
-    public function __toString(): string
+    protected function getCoordinateTypeName(): string
     {
-        return $this->toString();
-    }
-
-    /**
-     * @return string The longitude value as a string
-     */
-    public function toString(): string
-    {
-        return (string) $this->value;
-    }
-
-    /**
-     * @param  Equatable $other The other object to compare
-     * @return bool      True if the longitudes are equal
-     */
-    public function isEqual(Equatable $other): bool
-    {
-        if (! $other instanceof self) {
-            return false;
-        }
-
-        return $this->value === $other->value;
+        return 'Longitude';
     }
 }

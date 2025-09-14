@@ -88,11 +88,19 @@ describe('Coordinates Package', function (): void {
                 expect($coordinates1->isEqual($coordinates2))->toBeFalse();
             });
 
-            it('throws TypeError for incompatible types', function (): void {
+            it('returns false for incompatible types', function (): void {
                 $coordinates = Coordinates::create(40.7128, -74.0060);
-                $other = new stdClass;
 
-                expect(fn (): bool => $coordinates->isEqual($other))->toThrow(TypeError::class);
+                // Create a mock object that implements Equatable but is not a Coordinates
+                $other = new class implements \JeroenGerits\Support\Contracts\Equatable
+                {
+                    public function isEqual(\JeroenGerits\Support\Contracts\Equatable $other): bool
+                    {
+                        return false;
+                    }
+                };
+
+                expect($coordinates->isEqual($other))->toBeFalse();
             });
         });
 
@@ -233,6 +241,49 @@ describe('Coordinates Package', function (): void {
                 Coordinates::clearCache();
                 expect(Coordinates::getCacheSize())->toBe(0);
             });
+
+            it('manages Earth radius cache separately', function (): void {
+                // Clear cache first
+                Coordinates::clearCache();
+                expect(Coordinates::getEarthRadiusCacheSize())->toBe(0);
+
+                // Perform calculations with different Earth models and units
+                $point1 = Coordinates::create(40.7128, -74.0060);
+                $point2 = Coordinates::create(51.5074, -0.1278);
+
+                $point1->distanceTo($point2, DistanceUnit::KILOMETERS, EarthModel::WGS84);
+                $point1->distanceTo($point2, DistanceUnit::MILES, EarthModel::WGS84);
+                $point1->distanceTo($point2, DistanceUnit::KILOMETERS, EarthModel::SPHERICAL);
+
+                // Earth radius cache should have entries
+                expect(Coordinates::getEarthRadiusCacheSize())->toBeGreaterThan(0);
+
+                // Clear cache again
+                Coordinates::clearCache();
+                expect(Coordinates::getEarthRadiusCacheSize())->toBe(0);
+            });
+
+            it('caches are independent', function (): void {
+                // Clear cache first
+                Coordinates::clearCache();
+
+                // Perform calculations
+                $point1 = Coordinates::create(40.7128, -74.0060);
+                $point2 = Coordinates::create(51.5074, -0.1278);
+                $point1->distanceTo($point2);
+
+                $trigCacheSize = Coordinates::getCacheSize();
+                $radiusCacheSize = Coordinates::getEarthRadiusCacheSize();
+
+                // Both caches should have entries
+                expect($trigCacheSize)->toBeGreaterThan(0)
+                    ->and($radiusCacheSize)->toBeGreaterThan(0);
+
+                // Clear only trigonometric cache
+                Coordinates::clearCache();
+                expect(Coordinates::getCacheSize())->toBe(0)
+                    ->and(Coordinates::getEarthRadiusCacheSize())->toBe(0); // Both are cleared
+            });
         });
     });
 
@@ -257,6 +308,16 @@ describe('Coordinates Package', function (): void {
             it('throws exception for invalid range', function (): void {
                 expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Latitude => new Latitude(100.0))->toThrow(InvalidCoordinatesException::class)
                     ->and(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Latitude => new Latitude(-100.0))->toThrow(InvalidCoordinatesException::class);
+            });
+
+            it('throws exception with improved error message', function (): void {
+                try {
+                    new Latitude(100.0);
+                    expect(false)->toBeTrue('Expected exception was not thrown');
+                } catch (InvalidCoordinatesException $e) {
+                    expect($e->getMessage())->toContain('Latitude value 100 is outside the valid range of -90 to 90 degrees')
+                        ->and($e->getCode())->toBe(InvalidCoordinatesException::CODE_OUT_OF_RANGE);
+                }
             });
         });
 
@@ -283,6 +344,20 @@ describe('Coordinates Package', function (): void {
 
                 expect($latitude1->isEqual($latitude2))->toBeFalse();
             });
+
+            it('returns false for different types', function (): void {
+                $latitude = new Latitude(40.7128);
+                $longitude = new Longitude(-74.0060);
+
+                expect($latitude->isEqual($longitude))->toBeFalse();
+            });
+        });
+
+        describe('Constants', function (): void {
+            it('has correct min and max values', function (): void {
+                expect(Latitude::MIN_LATITUDE)->toBe(-90.0)
+                    ->and(Latitude::MAX_LATITUDE)->toBe(90.0);
+            });
         });
     });
 
@@ -308,6 +383,16 @@ describe('Coordinates Package', function (): void {
                 expect(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Longitude => new Longitude(200.0))->toThrow(InvalidCoordinatesException::class)
                     ->and(fn (): \JeroenGerits\Support\Coordinates\ValueObjects\Longitude => new Longitude(-200.0))->toThrow(InvalidCoordinatesException::class);
             });
+
+            it('throws exception with improved error message', function (): void {
+                try {
+                    new Longitude(200.0);
+                    expect(false)->toBeTrue('Expected exception was not thrown');
+                } catch (InvalidCoordinatesException $e) {
+                    expect($e->getMessage())->toContain('Longitude value 200 is outside the valid range of -180 to 180 degrees')
+                        ->and($e->getCode())->toBe(InvalidCoordinatesException::CODE_OUT_OF_RANGE);
+                }
+            });
         });
 
         describe('String', function (): void {
@@ -332,6 +417,20 @@ describe('Coordinates Package', function (): void {
                 $longitude2 = new Longitude(-0.1278);
 
                 expect($longitude1->isEqual($longitude2))->toBeFalse();
+            });
+
+            it('returns false for different types', function (): void {
+                $longitude = new Longitude(-74.0060);
+                $latitude = new Latitude(40.7128);
+
+                expect($longitude->isEqual($latitude))->toBeFalse();
+            });
+        });
+
+        describe('Constants', function (): void {
+            it('has correct min and max values', function (): void {
+                expect(Longitude::MIN_LONGITUDE)->toBe(-180.0)
+                    ->and(Longitude::MAX_LONGITUDE)->toBe(180.0);
             });
         });
     });
@@ -558,6 +657,62 @@ describe('Coordinates Package', function (): void {
 
                 expect($exception->getMessage())->toContain('Invalid coordinate array structure')
                     ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_INVALID_FORMAT);
+            });
+
+            it('creates for out of range with custom parameters', function (): void {
+                $exception = InvalidCoordinatesException::createOutOfRange(150.0, 'CustomCoordinate', -90.0, 90.0);
+
+                expect($exception->getMessage())->toBe('CustomCoordinate value 150 is outside the valid range of -90 to 90 degrees')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_OUT_OF_RANGE);
+            });
+
+            it('creates for invalid type with detailed information', function (): void {
+                $exception = InvalidCoordinatesException::invalidType('invalid', 'latitude');
+
+                expect($exception->getMessage())->toContain('Invalid latitude type: string')
+                    ->and($exception->getMessage())->toContain('Expected: float, int, string, or Latitude')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_INVALID_TYPE);
+            });
+
+            it('creates for invalid format with examples', function (): void {
+                $exception = InvalidCoordinatesException::invalidFormat('not-a-number', 'longitude');
+
+                expect($exception->getMessage())->toContain("Invalid longitude format: 'not-a-number'")
+                    ->and($exception->getMessage())->toContain("Expected decimal degrees (e.g., '-74.0060')")
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_INVALID_FORMAT);
+            });
+
+            it('creates for missing array keys with details', function (): void {
+                $array = ['lat' => 40.7128];
+                $exception = InvalidCoordinatesException::missingFromArray($array, 'lng');
+
+                expect($exception->getMessage())->toContain("Required key 'lng' missing from coordinate array")
+                    ->and($exception->getMessage())->toContain('Available keys: [lat] (1 total)')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_MISSING_VALUE);
+            });
+
+            it('creates for invalid array structure with details', function (): void {
+                $array = ['invalid' => 'structure'];
+                $exception = InvalidCoordinatesException::invalidArrayStructure($array);
+
+                expect($exception->getMessage())->toContain('Invalid coordinate array structure')
+                    ->and($exception->getMessage())->toContain('Got: array with 1 elements and keys [invalid]')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_INVALID_FORMAT);
+            });
+
+            it('creates for invalid numeric value', function (): void {
+                $exception = InvalidCoordinatesException::invalidNumericValue('not-numeric', 'coordinate');
+
+                expect($exception->getMessage())->toContain("Invalid coordinate numeric value: 'not-numeric'")
+                    ->and($exception->getMessage())->toContain('Expected a valid numeric value that can be converted to float')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_INVALID_TYPE);
+            });
+
+            it('creates for empty value', function (): void {
+                $exception = InvalidCoordinatesException::emptyValue('latitude');
+
+                expect($exception->getMessage())->toBe('Empty latitude value provided. Coordinate values cannot be empty or null')
+                    ->and($exception->getCode())->toBe(InvalidCoordinatesException::CODE_MISSING_VALUE);
             });
         });
     });

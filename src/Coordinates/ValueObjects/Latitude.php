@@ -4,71 +4,69 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use JeroenGerits\Support\Contracts\Equatable;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
-use Stringable;
 
 /**
  * Value object representing a latitude coordinate.
+ *
+ * Latitude values range from -90.0° (South Pole) to +90.0° (North Pole).
+ * This class provides immutable latitude objects with automatic validation.
+ *
+ * @example
+ * ```php
+ * $latitude = Latitude::create(40.7128); // New York latitude
+ * echo $latitude; // "40.7128"
+ * ```
  */
-class Latitude implements Equatable, Stringable
+class Latitude extends AbstractCoordinate
 {
-    /** Minimum valid latitude value in decimal degrees. */
+    /** Minimum valid latitude value in decimal degrees (South Pole). */
     public const float MIN_LATITUDE = -90.0;
 
-    /** Maximum valid latitude value in decimal degrees. */
+    /** Maximum valid latitude value in decimal degrees (North Pole). */
     public const float MAX_LATITUDE = 90.0;
 
     /**
-     * @param float $value The latitude value in decimal degrees (-90.0 to +90.0)
+     * Validate the latitude value.
+     *
+     * @param float $value The latitude value to validate
      *
      * @throws InvalidCoordinatesException When latitude value is outside valid range
      */
-    public function __construct(public float $value)
+    protected function validateValue(float $value): void
     {
         if ($value < self::MIN_LATITUDE || $value > self::MAX_LATITUDE) {
-            throw InvalidCoordinatesException::latitudeOutOfRange($value);
+            throw $this->createOutOfRangeException($value);
         }
     }
 
     /**
-     * Create a new Latitude instance from a value.
+     * Get the minimum valid value for latitude.
      *
-     * @param float $value The latitude value in decimal degrees
+     * @return float The minimum valid latitude value (-90.0)
+     */
+    protected function getMinValue(): float
+    {
+        return self::MIN_LATITUDE;
+    }
+
+    /**
+     * Get the maximum valid value for latitude.
      *
-     * @throws InvalidCoordinatesException When latitude value is invalid
+     * @return float The maximum valid latitude value (90.0)
      */
-    public static function create(float $value): self
+    protected function getMaxValue(): float
     {
-        return new self($value);
+        return self::MAX_LATITUDE;
     }
 
     /**
-     * @return string The latitude as a string
+     * Get the name of this coordinate type for error messages.
+     *
+     * @return string The coordinate type name ("Latitude")
      */
-    public function __toString(): string
+    protected function getCoordinateTypeName(): string
     {
-        return $this->toString();
-    }
-
-    /**
-     * @return string The latitude value as a string
-     */
-    public function toString(): string
-    {
-        return (string) $this->value;
-    }
-
-    /**
-     * @param  Equatable $other The other object to compare
-     * @return bool      True if the latitudes are equal
-     */
-    public function isEqual(Equatable $other): bool
-    {
-        if (! $other instanceof self) {
-            return false;
-        }
-
-        return $this->value === $other->value;
+        return 'Latitude';
     }
 }
