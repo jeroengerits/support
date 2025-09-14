@@ -6,6 +6,8 @@ namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Cache\CacheFactory;
 use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
+use JeroenGerits\Support\Cache\Traits\HasCache;
+use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Enums\EarthModel;
@@ -29,12 +31,14 @@ use Stringable;
  */
 class Coordinates implements Equatable, Stringable
 {
+    use HasCache;
+
     // Cache key prefixes for different trigonometric calculations
-    private const string RADIANS_CACHE_PREFIX = 'rad_';
+    private const string RADIANS_CACHE_PREFIX = 'rad';
 
-    private const string SINE_CACHE_PREFIX = 'sin_';
+    private const string SINE_CACHE_PREFIX = 'sin';
 
-    private const string COSINE_CACHE_PREFIX = 'cos_';
+    private const string COSINE_CACHE_PREFIX = 'cos';
 
     // Haversine formula constants
     private const float HAVERSINE_DIVISION_FACTOR = 2.0;
@@ -44,8 +48,8 @@ class Coordinates implements Equatable, Stringable
     // Distance calculation constants
     private const float ZERO_DISTANCE = 0.0;
 
-    /** @var CacheAdapter|null The cache adapter */
-    private static ?CacheAdapter $cache = null;
+    /** @var CacheAdapter|null The static cache adapter for trigonometric calculations */
+    private static ?CacheAdapter $staticCache = null;
 
     /**
      * Create a new Coordinates instance.
@@ -84,16 +88,6 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Set a custom cache adapter (useful for testing).
-     *
-     * @param CacheAdapter|null $cache The cache adapter to use
-     */
-    public static function setCache(?CacheAdapter $cache): void
-    {
-        self::$cache = $cache;
-    }
-
-    /**
      * Clear all caches and reset to default.
      *
      * This method clears the cache and resets it to the default configuration.
@@ -110,24 +104,24 @@ class Coordinates implements Equatable, Stringable
      *
      * @return CacheAdapter The cache adapter
      */
-    private static function getCache(): CacheAdapter
+    public static function getCache(): CacheAdapter
     {
-        if (! self::$cache instanceof \JeroenGerits\Support\Cache\Contracts\CacheAdapter) {
-            self::$cache = CacheFactory::createArrayCache(
+        if (! self::$staticCache instanceof CacheAdapter) {
+            self::$staticCache = CacheFactory::createArrayCache(
                 namespace: 'coordinates',
                 maxItems: 5000
             );
         }
 
-        return self::$cache;
+        return self::$staticCache;
     }
 
     /**
      * Get cache statistics.
      *
-     * @return \JeroenGerits\Support\Cache\ValueObjects\CacheStats Current cache statistics
+     * @return CacheStats Current cache statistics
      */
-    public static function getCacheStats(): \JeroenGerits\Support\Cache\ValueObjects\CacheStats
+    public static function getCacheStats(): CacheStats
     {
         return self::getCache()->getStats();
     }
@@ -192,6 +186,215 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
+     * Get the Earth radius for the specified unit and model with caching.
+     *
+     * @param  DistanceUnit $unit       The distance unit
+     * @param  EarthModel   $earthModel The Earth model to use
+     * @return float        The Earth radius in the specified unit
+     */
+    private static function getCachedEarthRadius(DistanceUnit $unit, EarthModel $earthModel): float
+    {
+        $cache = self::getCache();
+        $key = "earth_radius_{$earthModel->value}_{$unit->value}";
+
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $radius = $earthModel->getRadius($unit);
+        $cache->set($key, $radius, TimeToLive::fromDays(30)->seconds); // Earth radius never changes
+
+        return $radius;
+    }
+
+    /**
+     * Calculate the distance between two coordinates using the provided Earth radius.
+     *
+     * @param  Coordinates $source      The source coordinates
+     * @param  Coordinates $target      The target coordinates
+     * @param  float       $earthRadius The Earth radius in the desired unit
+     * @return float       The distance between the coordinates
+     */
+    private static function calculateDistanceBetween(
+        Coordinates $source,
+        Coordinates $target,
+        float $earthRadius
+    ): float {
+        if ($source->isEqual($target)) {
+            return self::ZERO_DISTANCE;
+        }
+
+        $haversineValue = self::calculateHaversineValue($source, $target);
+
+        return $earthRadius * $haversineValue;
+    }
+
+    /**
+     * Check if this coordinates object is equal to another.
+     *
+     * @param  Equatable $other The other object to compare
+     * @return bool      True if the coordinates are equal, false otherwise
+     */
+    public function isEqual(Equatable $other): bool
+    {
+        if (! $other instanceof self) {
+            return false;
+        }
+
+        return $this->latitude->isEqual($other->latitude)
+            && $this->longitude->isEqual($other->longitude);
+    }
+
+    /**
+     * Calculate the Haversine value for two coordinates.
+     *
+     * The Haversine formula calculates the great-circle distance between
+     * two points on a sphere given their latitudes and longitudes.
+     *
+     * @param  Coordinates $source The source coordinates
+     * @param  Coordinates $target The target coordinates
+     * @return float       The Haversine calculation result
+     */
+    private static function calculateHaversineValue(Coordinates $source, Coordinates $target): float
+    {
+        $radians = self::convertCoordinatesToRadians($source, $target);
+        $differences = self::calculateCoordinateDifferences($radians);
+        $trigonometricValues = self::calculateTrigonometricValues($radians, $differences);
+
+        return self::applyHaversineFormula($trigonometricValues);
+    }
+
+    /**
+     * Convert coordinate values to radians with caching.
+     *
+     * @param  Coordinates                                               $source The source coordinates
+     * @param  Coordinates                                               $target The target coordinates
+     * @return array{lat1: float, lon1: float, lat2: float, lon2: float} Radian values
+     */
+    private static function convertCoordinatesToRadians(Coordinates $source, Coordinates $target): array
+    {
+        return [
+            'lat1' => self::getCachedRadians($source->latitude->value),
+            'lon1' => self::getCachedRadians($source->longitude->value),
+            'lat2' => self::getCachedRadians($target->latitude->value),
+            'lon2' => self::getCachedRadians($target->longitude->value),
+        ];
+    }
+
+    /**
+     * Get the radians value for degrees with caching.
+     *
+     * @param  float $degrees The degrees value to convert to radians
+     * @return float The radians value
+     */
+    private static function getCachedRadians(float $degrees): float
+    {
+        $cache = self::getCache();
+        $key = self::RADIANS_CACHE_PREFIX.'_'.$degrees;
+
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $radians = deg2rad($degrees);
+        $cache->set($key, $radians, TimeToLive::fromHours(24)->seconds);
+
+        return $radians;
+    }
+
+    /**
+     * Calculate the differences between coordinate values.
+     *
+     * @param  array{lat1: float, lon1: float, lat2: float, lon2: float} $radians Radian values
+     * @return array{dlat: float, dlon: float}                           Coordinate differences
+     */
+    private static function calculateCoordinateDifferences(array $radians): array
+    {
+        return [
+            'dlat' => $radians['lat2'] - $radians['lat1'],
+            'dlon' => $radians['lon2'] - $radians['lon1'],
+        ];
+    }
+
+    /**
+     * Calculate trigonometric values needed for the Haversine formula.
+     *
+     * @param  array{lat1: float, lon1: float, lat2: float, lon2: float}             $radians     Radian values
+     * @param  array{dlat: float, dlon: float}                                       $differences Coordinate differences
+     * @return array{sinDlat: float, sinDlon: float, cosLat1: float, cosLat2: float} Trigonometric values
+     */
+    private static function calculateTrigonometricValues(array $radians, array $differences): array
+    {
+        return [
+            'sinDlat' => self::getCachedSin($differences['dlat'] / self::HAVERSINE_DIVISION_FACTOR),
+            'sinDlon' => self::getCachedSin($differences['dlon'] / self::HAVERSINE_DIVISION_FACTOR),
+            'cosLat1' => self::getCachedCos($radians['lat1']),
+            'cosLat2' => self::getCachedCos($radians['lat2']),
+        ];
+    }
+
+    /**
+     * Get the sine value for radians with caching.
+     *
+     * @param  float $radians The radians value to calculate sine for
+     * @return float The sine value
+     */
+    private static function getCachedSin(float $radians): float
+    {
+        $cache = self::getCache();
+        $key = self::SINE_CACHE_PREFIX.'_'.$radians;
+
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $sine = sin($radians);
+        $cache->set($key, $sine, TimeToLive::fromHours(24)->seconds);
+
+        return $sine;
+    }
+
+    /**
+     * Get the cosine value for radians with caching.
+     *
+     * @param  float $radians The radians value to calculate cosine for
+     * @return float The cosine value
+     */
+    private static function getCachedCos(float $radians): float
+    {
+        $cache = self::getCache();
+        $key = self::COSINE_CACHE_PREFIX.'_'.$radians;
+
+        $cached = $cache->get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $cosine = cos($radians);
+        $cache->set($key, $cosine, TimeToLive::fromHours(24)->seconds);
+
+        return $cosine;
+    }
+
+    /**
+     * Apply the Haversine formula to calculate the angular distance.
+     *
+     * @param  array{sinDlat: float, sinDlon: float, cosLat1: float, cosLat2: float} $trigValues Trigonometric values
+     * @return float                                                                 The angular distance in radians
+     */
+    private static function applyHaversineFormula(array $trigValues): float
+    {
+        $haversineA = $trigValues['sinDlat'] * $trigValues['sinDlat']
+            + $trigValues['cosLat1'] * $trigValues['cosLat2']
+            * $trigValues['sinDlon'] * $trigValues['sinDlon'];
+
+        return self::HAVERSINE_MULTIPLICATION_FACTOR * asin(sqrt($haversineA));
+    }
+
+    /**
      * Get the string representation of the coordinates.
      *
      * @return string The coordinates in "latitude,longitude" format
@@ -235,211 +438,55 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Check if this coordinates object is equal to another.
+     * Get cached metadata for this coordinate (demonstrates trait usage).
      *
-     * @param  Equatable $other The other object to compare
-     * @return bool      True if the coordinates are equal, false otherwise
+     * This method demonstrates how to use the HasCache trait for instance-level
+     * caching of expensive calculations or metadata.
+     *
+     * @return array<string, mixed> Coordinate metadata
      */
-    public function isEqual(Equatable $other): bool
+    public function getCachedMetadata(): array
     {
-        if (! $other instanceof self) {
-            return false;
+        $this->initializeInstanceCache();
+
+        return $this->cacheRemember(
+            'metadata_'.$this->latitude->value.'_'.$this->longitude->value,
+            function (): array {
+                // Simulate expensive calculation
+                return [
+                    'latitude' => $this->latitude->value,
+                    'longitude' => $this->longitude->value,
+                    'string_representation' => (string) $this,
+                    'computed_at' => time(),
+                    'hash' => md5($this->latitude->value.$this->longitude->value),
+                ];
+            }
+        );
+    }
+
+    /**
+     * Initialize the cache for this instance.
+     *
+     * This method sets up the cache configuration for instance-level caching.
+     * It's called automatically when needed.
+     */
+    private function initializeInstanceCache(): void
+    {
+        if (! $this->isCacheEnabled()) {
+            $cache = self::getCache();
+            $this->setCache($cache);
+            $this->setCacheNamespace('coordinates_instance');
+            $this->setCacheDefaultTtl(TimeToLive::fromHours(24)->seconds);
         }
-
-        return $this->latitude->isEqual($other->latitude)
-            && $this->longitude->isEqual($other->longitude);
     }
 
     /**
-     * Calculate the distance between two coordinates using the provided Earth radius.
+     * Set a custom cache adapter (useful for testing).
      *
-     * @param  Coordinates $source      The source coordinates
-     * @param  Coordinates $target      The target coordinates
-     * @param  float       $earthRadius The Earth radius in the desired unit
-     * @return float       The distance between the coordinates
+     * @param CacheAdapter|null $cache The cache adapter to use
      */
-    private static function calculateDistanceBetween(
-        Coordinates $source,
-        Coordinates $target,
-        float $earthRadius
-    ): float {
-        if ($source->isEqual($target)) {
-            return self::ZERO_DISTANCE;
-        }
-
-        $haversineValue = self::calculateHaversineValue($source, $target);
-
-        return $earthRadius * $haversineValue;
-    }
-
-    /**
-     * Get the Earth radius for the specified unit and model with caching.
-     *
-     * @param  DistanceUnit $unit       The distance unit
-     * @param  EarthModel   $earthModel The Earth model to use
-     * @return float        The Earth radius in the specified unit
-     */
-    private static function getCachedEarthRadius(DistanceUnit $unit, EarthModel $earthModel): float
+    public static function setCache(?CacheAdapter $cache): void
     {
-        $cache = self::getCache();
-        $key = "{$earthModel->value}_{$unit->value}";
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $radius = $earthModel->getRadius($unit);
-        $cache->set($key, $radius, TimeToLive::fromDays(30)->seconds); // Earth radius never changes
-
-        return $radius;
-    }
-
-    /**
-     * Calculate the Haversine value for two coordinates.
-     *
-     * The Haversine formula calculates the great-circle distance between
-     * two points on a sphere given their latitudes and longitudes.
-     *
-     * @param  Coordinates $source The source coordinates
-     * @param  Coordinates $target The target coordinates
-     * @return float       The Haversine calculation result
-     */
-    private static function calculateHaversineValue(Coordinates $source, Coordinates $target): float
-    {
-        $radians = self::convertCoordinatesToRadians($source, $target);
-        $differences = self::calculateCoordinateDifferences($radians);
-        $trigonometricValues = self::calculateTrigonometricValues($radians, $differences);
-
-        return self::applyHaversineFormula($trigonometricValues);
-    }
-
-    /**
-     * Convert coordinate values to radians with caching.
-     *
-     * @param  Coordinates                                               $source The source coordinates
-     * @param  Coordinates                                               $target The target coordinates
-     * @return array{lat1: float, lon1: float, lat2: float, lon2: float} Radian values
-     */
-    private static function convertCoordinatesToRadians(Coordinates $source, Coordinates $target): array
-    {
-        return [
-            'lat1' => self::getCachedRadians($source->latitude->value),
-            'lon1' => self::getCachedRadians($source->longitude->value),
-            'lat2' => self::getCachedRadians($target->latitude->value),
-            'lon2' => self::getCachedRadians($target->longitude->value),
-        ];
-    }
-
-    /**
-     * Calculate the differences between coordinate values.
-     *
-     * @param  array{lat1: float, lon1: float, lat2: float, lon2: float} $radians Radian values
-     * @return array{dlat: float, dlon: float}                           Coordinate differences
-     */
-    private static function calculateCoordinateDifferences(array $radians): array
-    {
-        return [
-            'dlat' => $radians['lat2'] - $radians['lat1'],
-            'dlon' => $radians['lon2'] - $radians['lon1'],
-        ];
-    }
-
-    /**
-     * Calculate trigonometric values needed for the Haversine formula.
-     *
-     * @param  array{lat1: float, lon1: float, lat2: float, lon2: float}             $radians     Radian values
-     * @param  array{dlat: float, dlon: float}                                       $differences Coordinate differences
-     * @return array{sinDlat: float, sinDlon: float, cosLat1: float, cosLat2: float} Trigonometric values
-     */
-    private static function calculateTrigonometricValues(array $radians, array $differences): array
-    {
-        return [
-            'sinDlat' => self::getCachedSin($differences['dlat'] / self::HAVERSINE_DIVISION_FACTOR),
-            'sinDlon' => self::getCachedSin($differences['dlon'] / self::HAVERSINE_DIVISION_FACTOR),
-            'cosLat1' => self::getCachedCos($radians['lat1']),
-            'cosLat2' => self::getCachedCos($radians['lat2']),
-        ];
-    }
-
-    /**
-     * Apply the Haversine formula to calculate the angular distance.
-     *
-     * @param  array{sinDlat: float, sinDlon: float, cosLat1: float, cosLat2: float} $trigValues Trigonometric values
-     * @return float                                                                 The angular distance in radians
-     */
-    private static function applyHaversineFormula(array $trigValues): float
-    {
-        $haversineA = $trigValues['sinDlat'] * $trigValues['sinDlat']
-            + $trigValues['cosLat1'] * $trigValues['cosLat2']
-            * $trigValues['sinDlon'] * $trigValues['sinDlon'];
-
-        return self::HAVERSINE_MULTIPLICATION_FACTOR * asin(sqrt($haversineA));
-    }
-
-    /**
-     * Get the radians value for degrees with caching.
-     *
-     * @param  float $degrees The degrees value to convert to radians
-     * @return float The radians value
-     */
-    private static function getCachedRadians(float $degrees): float
-    {
-        $cache = self::getCache();
-        $key = self::RADIANS_CACHE_PREFIX.$degrees;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $radians = deg2rad($degrees);
-        $cache->set($key, $radians, TimeToLive::fromHours(24)->seconds);
-
-        return $radians;
-    }
-
-    /**
-     * Get the sine value for radians with caching.
-     *
-     * @param  float $radians The radians value to calculate sine for
-     * @return float The sine value
-     */
-    private static function getCachedSin(float $radians): float
-    {
-        $cache = self::getCache();
-        $key = self::SINE_CACHE_PREFIX.$radians;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $sine = sin($radians);
-        $cache->set($key, $sine, TimeToLive::fromHours(24)->seconds);
-
-        return $sine;
-    }
-
-    /**
-     * Get the cosine value for radians with caching.
-     *
-     * @param  float $radians The radians value to calculate cosine for
-     * @return float The cosine value
-     */
-    private static function getCachedCos(float $radians): float
-    {
-        $cache = self::getCache();
-        $key = self::COSINE_CACHE_PREFIX.$radians;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $cosine = cos($radians);
-        $cache->set($key, $cosine, TimeToLive::fromHours(24)->seconds);
-
-        return $cosine;
+        self::$staticCache = $cache;
     }
 }

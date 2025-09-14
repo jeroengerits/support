@@ -284,6 +284,24 @@ describe('Coordinates Package', function (): void {
                 expect(Coordinates::getCacheSize())->toBe(0)
                     ->and(Coordinates::getEarthRadiusCacheSize())->toBe(0); // Both are cleared
             });
+
+            it('demonstrates HasCache trait usage with getCachedMetadata', function (): void {
+                $coordinates = Coordinates::create(40.7128, -74.0060);
+
+                // First call - should compute and cache
+                $metadata1 = $coordinates->getCachedMetadata();
+                expect($metadata1)->toBeArray();
+                expect($metadata1['latitude'])->toBe(40.7128);
+                expect($metadata1['longitude'])->toBe(-74.0060);
+                expect($metadata1['string_representation'])->toBe('40.7128,-74.006');
+                expect($metadata1)->toHaveKey('computed_at');
+                expect($metadata1)->toHaveKey('hash');
+
+                // Second call - should return cached result
+                $metadata2 = $coordinates->getCachedMetadata();
+                expect($metadata1['computed_at'])->toBe($metadata2['computed_at']); // Same timestamp = cached
+                expect($metadata1)->toBe($metadata2); // Identical arrays
+            });
         });
     });
 

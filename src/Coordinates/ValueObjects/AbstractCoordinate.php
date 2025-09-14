@@ -35,6 +35,15 @@ abstract class AbstractCoordinate implements Equatable, Stringable
     }
 
     /**
+     * Validate the coordinate value.
+     *
+     * @param float $value The coordinate value to validate
+     *
+     * @throws InvalidCoordinatesException When the coordinate value is outside the valid range
+     */
+    abstract protected function validateValue(float $value): void;
+
+    /**
      * Create a new coordinate instance from a value.
      *
      * @param  float  $value The coordinate value in decimal degrees
@@ -83,13 +92,19 @@ abstract class AbstractCoordinate implements Equatable, Stringable
     }
 
     /**
-     * Validate the coordinate value.
+     * Create an exception for out-of-range values.
      *
-     * @param float $value The coordinate value to validate
-     *
-     * @throws InvalidCoordinatesException When the coordinate value is outside the valid range
+     * @param  float                       $value The out-of-range value
+     * @return InvalidCoordinatesException The exception instance
      */
-    abstract protected function validateValue(float $value): void;
+    protected function createOutOfRangeException(float $value): InvalidCoordinatesException
+    {
+        $minValue = $this->getMinValue();
+        $maxValue = $this->getMaxValue();
+        $typeName = $this->getCoordinateTypeName();
+
+        return InvalidCoordinatesException::createOutOfRange($value, $typeName, $minValue, $maxValue);
+    }
 
     /**
      * Get the minimum valid value for this coordinate type.
@@ -111,19 +126,4 @@ abstract class AbstractCoordinate implements Equatable, Stringable
      * @return string The coordinate type name
      */
     abstract protected function getCoordinateTypeName(): string;
-
-    /**
-     * Create an exception for out-of-range values.
-     *
-     * @param  float                       $value The out-of-range value
-     * @return InvalidCoordinatesException The exception instance
-     */
-    protected function createOutOfRangeException(float $value): InvalidCoordinatesException
-    {
-        $minValue = $this->getMinValue();
-        $maxValue = $this->getMaxValue();
-        $typeName = $this->getCoordinateTypeName();
-
-        return InvalidCoordinatesException::createOutOfRange($value, $typeName, $minValue, $maxValue);
-    }
 }

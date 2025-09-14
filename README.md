@@ -4,5 +4,6 @@ A PHP 8.4+ library providing clean utilities for my personal projects.
 
 ## Packages
 
-- **[Cache](src/Cache/README.md)** - PSR-16 compliant caching with TTL support, accurate DateInterval handling, and optimized performance
+- **[Cache](src/Cache/README.md)** - PSR-16 compliant caching with TTL support, accurate DateInterval handling, and
+  optimized performance
 - **[Coordinates](src/Coordinates/README.md)** - Geographic coordinates with distance calculations

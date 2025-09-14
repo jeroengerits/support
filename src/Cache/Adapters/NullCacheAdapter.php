@@ -19,6 +19,16 @@ readonly class NullCacheAdapter implements CacheAdapter
     }
 
     /**
+     * Validate the cache configuration.
+     */
+    private function validate(): void
+    {
+        if ($this->namespace === '' || $this->namespace === '0') {
+            throw new \InvalidArgumentException('Cache namespace cannot be empty');
+        }
+    }
+
+    /**
      * Get a value from the cache (always returns default).
      *
      * @param  string $key     The cache key
@@ -139,15 +149,5 @@ readonly class NullCacheAdapter implements CacheAdapter
     public function getNamespace(): string
     {
         return $this->namespace;
-    }
-
-    /**
-     * Validate the cache configuration.
-     */
-    private function validate(): void
-    {
-        if ($this->namespace === '' || $this->namespace === '0') {
-            throw new \InvalidArgumentException('Cache namespace cannot be empty');
-        }
     }
 }

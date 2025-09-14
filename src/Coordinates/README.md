@@ -86,7 +86,23 @@ $distance = $ny->distanceTo($london, DistanceUnit::KILOMETERS, EarthModel::SPHER
 
 ## Performance
 
-- **Intelligent Caching**: Trigonometric calculations cached automatically
+- **Intelligent Caching**: Trigonometric calculations cached automatically using HasCache trait
 - **Early Returns**: Identical coordinates return 0 distance immediately
 - **Batch Processing**: Efficient processing of multiple coordinate pairs
 - **Memory Management**: LRU eviction prevents memory leaks
+- **Instance Caching**: Uses HasCache trait for instance-level caching capabilities
+
+## HasCache Trait Integration
+
+The Coordinates class demonstrates how to use the HasCache trait for instance-level caching:
+
+```php
+$coordinates = Coordinates::create(40.7128, -74.0060);
+
+// Get cached metadata (demonstrates trait usage)
+$metadata = $coordinates->getCachedMetadata();
+// Returns: ['latitude' => 40.7128, 'longitude' => -74.0060, 'computed_at' => ..., ...]
+
+// Subsequent calls return cached result
+$metadata2 = $coordinates->getCachedMetadata(); // Returns cached version
+```

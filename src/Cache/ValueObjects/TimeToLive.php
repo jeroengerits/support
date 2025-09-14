@@ -28,6 +28,18 @@ class TimeToLive implements Equatable, Stringable
     }
 
     /**
+     * Validate the TTL value.
+     *
+     * @throws InvalidTimeToLiveException When the TTL is invalid
+     */
+    private function validate(): void
+    {
+        if ($this->seconds < 0) {
+            throw InvalidTimeToLiveException::negativeValue($this->seconds);
+        }
+    }
+
+    /**
      * Create a TTL from seconds.
      *
      * @param  int  $seconds Number of seconds
@@ -100,17 +112,5 @@ class TimeToLive implements Equatable, Stringable
     public function __toString(): string
     {
         return "{$this->seconds}s";
-    }
-
-    /**
-     * Validate the TTL value.
-     *
-     * @throws InvalidTimeToLiveException When the TTL is invalid
-     */
-    private function validate(): void
-    {
-        if ($this->seconds < 0) {
-            throw InvalidTimeToLiveException::negativeValue($this->seconds);
-        }
     }
 }

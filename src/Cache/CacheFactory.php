@@ -37,4 +37,20 @@ class CacheFactory
     {
         return new NullCacheAdapter($namespace);
     }
+
+    /**
+     * Create a new array-based cache adapter with time mocking for testing.
+     *
+     * @param  string          $namespace    The cache namespace
+     * @param  int             $maxItems     Maximum number of items to cache
+     * @param  callable(): int $timeProvider Function that returns current timestamp
+     * @return CacheAdapter    The cache adapter
+     */
+    public static function createArrayCacheWithTimeProvider(
+        string $namespace = 'default',
+        int $maxItems = 1000,
+        ?callable $timeProvider = null
+    ): CacheAdapter {
+        return new ArrayCacheAdapter($namespace, $maxItems, $timeProvider);
+    }
 }

@@ -21,6 +21,30 @@ class CacheKey implements Equatable, Stringable
     }
 
     /**
+     * Validate the cache key.
+     *
+     * @throws InvalidCacheKeyException When the key is invalid
+     */
+    private function validate(): void
+    {
+        if ($this->key === '' || $this->key === '0') {
+            throw InvalidCacheKeyException::emptyKey();
+        }
+
+        if (str_contains($this->key, ':')) {
+            throw InvalidCacheKeyException::invalidCharacters($this->key, ':');
+        }
+
+        if ($this->namespace === '' || $this->namespace === '0') {
+            throw InvalidCacheKeyException::emptyKey();
+        }
+
+        if (str_contains($this->namespace, ':')) {
+            throw InvalidCacheKeyException::invalidCharacters($this->namespace, ':');
+        }
+    }
+
+    /**
      * Create a new cache key instance.
      *
      * @param  string $key       The cache key
@@ -55,29 +79,5 @@ class CacheKey implements Equatable, Stringable
     public function __toString(): string
     {
         return "{$this->namespace}:{$this->key}";
-    }
-
-    /**
-     * Validate the cache key.
-     *
-     * @throws InvalidCacheKeyException When the key is invalid
-     */
-    private function validate(): void
-    {
-        if ($this->key === '' || $this->key === '0') {
-            throw InvalidCacheKeyException::emptyKey();
-        }
-
-        if (str_contains($this->key, ':')) {
-            throw InvalidCacheKeyException::invalidCharacters($this->key, ':');
-        }
-
-        if ($this->namespace === '' || $this->namespace === '0') {
-            throw InvalidCacheKeyException::emptyKey();
-        }
-
-        if (str_contains($this->namespace, ':')) {
-            throw InvalidCacheKeyException::invalidCharacters($this->namespace, ':');
-        }
     }
 }

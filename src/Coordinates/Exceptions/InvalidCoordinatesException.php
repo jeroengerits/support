@@ -27,6 +27,22 @@ class InvalidCoordinatesException extends CoordinatesException
     }
 
     /**
+     * @param  float  $value The latitude value that is out of range
+     * @return static A new InvalidCoordinatesException instance
+     *
+     * @deprecated Use createOutOfRange() instead
+     */
+    public static function latitudeOutOfRange(float $value): static
+    {
+        return self::createOutOfRange(
+            $value,
+            'Latitude',
+            Latitude::MIN_LATITUDE,
+            Latitude::MAX_LATITUDE
+        );
+    }
+
+    /**
      * Create an exception for coordinate values that are out of range.
      *
      * @param  float  $value          The coordinate value that is out of range
@@ -44,22 +60,6 @@ class InvalidCoordinatesException extends CoordinatesException
         return new static(
             "{$coordinateType} value {$value} is outside the valid range of {$minValue} to {$maxValue} degrees",
             self::CODE_OUT_OF_RANGE
-        );
-    }
-
-    /**
-     * @param  float  $value The latitude value that is out of range
-     * @return static A new InvalidCoordinatesException instance
-     *
-     * @deprecated Use createOutOfRange() instead
-     */
-    public static function latitudeOutOfRange(float $value): static
-    {
-        return self::createOutOfRange(
-            $value,
-            'Latitude',
-            Latitude::MIN_LATITUDE,
-            Latitude::MAX_LATITUDE
         );
     }
 

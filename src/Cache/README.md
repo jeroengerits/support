@@ -118,6 +118,7 @@ $cache = CacheFactory::createArrayCache(
 ```
 
 **Performance Features:**
+
 - Optimized `has()` method for efficient existence checks
 - Accurate DateInterval to timestamp conversion using DateTime
 - Efficient memory management with LRU eviction
@@ -131,6 +132,53 @@ $cache = CacheFactory::createNullCache('test');
 // All operations are no-ops
 ```
 
+## HasCache Trait
+
+The `HasCache` trait provides a clean interface for adding caching capabilities to any class:
+
+```php
+use JeroenGerits\Support\Cache\Traits\HasCache;
+use JeroenGerits\Support\Cache\CacheFactory;
+
+class MyService
+{
+    use HasCache;
+
+    public function __construct()
+    {
+        $this->setCache(CacheFactory::createArrayCache('my-service', 1000))
+             ->setCacheNamespace('my-service')
+             ->setCacheDefaultTtl(3600); // 1 hour
+    }
+
+    public function getExpensiveData(string $id): array
+    {
+        return $this->cacheRemember("data_{$id}", function () use ($id) {
+            // Expensive operation here
+            return $this->fetchDataFromDatabase($id);
+        });
+    }
+
+    public function updateAndCache(string $id, array $data): array
+    {
+        return $this->cachePut("data_{$id}", function () use ($id, $data) {
+            $this->saveToDatabase($id, $data);
+            return $data;
+        });
+    }
+}
+```
+
+### Trait Methods
+
+- `cacheRemember($key, $callback, $ttl)` - Execute callback if cache miss, cache and return result
+- `cachePut($key, $callback, $ttl)` - Always execute callback and cache result
+- `cacheGet($key, $default)` - Retrieve cached value
+- `cacheSet($key, $value, $ttl)` - Store value in cache
+- `cacheHas($key)` - Check if key exists
+- `cacheDelete($key)` - Remove key from cache
+- `generateCacheKey(...$parts)` - Generate namespaced cache key
+
 ## Best Practices
 
 1. **Use Namespaces**: Organize cache keys with meaningful namespaces
@@ -138,3 +186,4 @@ $cache = CacheFactory::createNullCache('test');
 3. **Monitor Statistics**: Use cache stats to optimize performance
 4. **Handle Cache Misses**: Always handle null returns from cache operations
 5. **Test with Null Cache**: Use null cache adapter in tests to avoid side effects
+6. **Use HasCache Trait**: Leverage the trait for clean caching integration

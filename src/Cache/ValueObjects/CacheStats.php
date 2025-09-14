@@ -21,6 +21,32 @@ class CacheStats implements Equatable
     }
 
     /**
+     * Validate the cache statistics.
+     */
+    private function validate(): void
+    {
+        if ($this->hits < 0) {
+            throw new \InvalidArgumentException('Cache hits cannot be negative');
+        }
+
+        if ($this->misses < 0) {
+            throw new \InvalidArgumentException('Cache misses cannot be negative');
+        }
+
+        if ($this->items < 0) {
+            throw new \InvalidArgumentException('Cache items cannot be negative');
+        }
+
+        if ($this->maxItems < 0) {
+            throw new \InvalidArgumentException('Cache max items cannot be negative');
+        }
+
+        if ($this->items > $this->maxItems) {
+            throw new \InvalidArgumentException('Cache items cannot exceed max items');
+        }
+    }
+
+    /**
      * Create cache statistics from individual values.
      *
      * @param  int  $hits     Number of cache hits
@@ -55,28 +81,6 @@ class CacheStats implements Equatable
     }
 
     /**
-     * Get the total number of cache requests (hits + misses).
-     *
-     * @return int Total number of requests
-     */
-    public function getTotalRequests(): int
-    {
-        return $this->hits + $this->misses;
-    }
-
-    /**
-     * Get the cache hit ratio (hits / total requests).
-     *
-     * @return float Cache hit ratio between 0.0 and 1.0
-     */
-    public function getHitRatio(): float
-    {
-        $total = $this->getTotalRequests();
-
-        return $total === 0 ? 0.0 : $this->hits / $total;
-    }
-
-    /**
      * Get the number of items currently in cache.
      *
      * @return int Number of cached items
@@ -94,16 +98,6 @@ class CacheStats implements Equatable
     public function getMaxItems(): int
     {
         return $this->maxItems;
-    }
-
-    /**
-     * Get cache utilization (items / max items).
-     *
-     * @return float Cache utilization ratio between 0.0 and 1.0
-     */
-    public function getUtilization(): float
-    {
-        return $this->maxItems === 0 ? 0.0 : $this->items / $this->maxItems;
     }
 
     /**
@@ -135,28 +129,34 @@ class CacheStats implements Equatable
     }
 
     /**
-     * Validate the cache statistics.
+     * Get the cache hit ratio (hits / total requests).
+     *
+     * @return float Cache hit ratio between 0.0 and 1.0
      */
-    private function validate(): void
+    public function getHitRatio(): float
     {
-        if ($this->hits < 0) {
-            throw new \InvalidArgumentException('Cache hits cannot be negative');
-        }
+        $total = $this->getTotalRequests();
 
-        if ($this->misses < 0) {
-            throw new \InvalidArgumentException('Cache misses cannot be negative');
-        }
+        return $total === 0 ? 0.0 : $this->hits / $total;
+    }
 
-        if ($this->items < 0) {
-            throw new \InvalidArgumentException('Cache items cannot be negative');
-        }
+    /**
+     * Get the total number of cache requests (hits + misses).
+     *
+     * @return int Total number of requests
+     */
+    public function getTotalRequests(): int
+    {
+        return $this->hits + $this->misses;
+    }
 
-        if ($this->maxItems < 0) {
-            throw new \InvalidArgumentException('Cache max items cannot be negative');
-        }
-
-        if ($this->items > $this->maxItems) {
-            throw new \InvalidArgumentException('Cache items cannot exceed max items');
-        }
+    /**
+     * Get cache utilization (items / max items).
+     *
+     * @return float Cache utilization ratio between 0.0 and 1.0
+     */
+    public function getUtilization(): float
+    {
+        return $this->maxItems === 0 ? 0.0 : $this->items / $this->maxItems;
     }
 }
