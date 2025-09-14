@@ -48,22 +48,6 @@ if (! function_exists('coordinates')) {
         float|string|array|int|Latitude|null $latitude = null,
         float|int|string|Longitude|null $longitude = null
     ): Coordinates {
-        // Handle array input for latitude
-        if (is_array($latitude)) {
-            $lat = $latitude['lat'] ?? $latitude['latitude'] ?? $latitude[0] ?? null;
-            $lng = $latitude['lng'] ?? $latitude['longitude'] ?? $latitude[1] ?? null;
-
-            if ($lat === null && $lng === null) {
-                throw InvalidCoordinatesException::invalidArrayStructure($latitude);
-            } elseif ($lat === null) {
-                throw InvalidCoordinatesException::missingFromArray($latitude, 'latitude');
-            } elseif ($lng === null) {
-                throw InvalidCoordinatesException::missingFromArray($latitude, 'longitude');
-            }
-
-            return CoordinatesFactory::createCoordinates($lat, $lng);
-        }
-
         return CoordinatesFactory::createCoordinates($latitude, $longitude);
     }
 }

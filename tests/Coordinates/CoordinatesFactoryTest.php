@@ -174,3 +174,40 @@ it('returns existing longitude object', function (): void {
 
     expect($longitude)->toBe($originalLongitude);
 });
+
+// Tests for array input functionality
+it('creates coordinates from array with lat/lng keys', function (): void {
+    $array = ['lat' => 52.3676, 'lng' => 4.9041];
+    $coordinates = CoordinatesFactory::createCoordinates($array);
+
+    expect($coordinates)->toBeInstanceOf(Coordinates::class)
+        ->and($coordinates->latitude->value)->toBe(52.3676)
+        ->and($coordinates->longitude->value)->toBe(4.9041);
+});
+
+it('creates coordinates from array with latitude/longitude keys', function (): void {
+    $array = ['latitude' => 52.3676, 'longitude' => 4.9041];
+    $coordinates = CoordinatesFactory::createCoordinates($array);
+
+    expect($coordinates)->toBeInstanceOf(Coordinates::class)
+        ->and($coordinates->latitude->value)->toBe(52.3676)
+        ->and($coordinates->longitude->value)->toBe(4.9041);
+});
+
+it('creates coordinates from array with numeric keys', function (): void {
+    $array = [52.3676, 4.9041];
+    $coordinates = CoordinatesFactory::createCoordinates($array);
+
+    expect($coordinates)->toBeInstanceOf(Coordinates::class)
+        ->and($coordinates->latitude->value)->toBe(52.3676)
+        ->and($coordinates->longitude->value)->toBe(4.9041);
+});
+
+it('creates coordinates from array using createFromArray method', function (): void {
+    $array = ['lat' => 52.3676, 'lng' => 4.9041];
+    $coordinates = CoordinatesFactory::createFromArray($array);
+
+    expect($coordinates)->toBeInstanceOf(Coordinates::class)
+        ->and($coordinates->latitude->value)->toBe(52.3676)
+        ->and($coordinates->longitude->value)->toBe(4.9041);
+});
