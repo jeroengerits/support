@@ -4,4 +4,4 @@ A PHP support package with utility classes and value objects for various project
 
 ## Features
 
-- [Coordinates](tests/Coordinates/README.md)
+- [Coordinates](src/Coordinates/README.md)
