@@ -119,26 +119,6 @@ echo $longitude->toString(); // "-74.0060"
 
 ## Advanced Features
 
-### Earth Models
-
-The package supports different Earth models for distance calculations:
-
-```php
-use JeroenGerits\Support\Coordinates\Enums\EarthModel;
-
-// Available Earth models
-EarthModel::SPHERICAL; // Spherical Earth model with mean radius
-EarthModel::WGS84;     // World Geodetic System 1984
-EarthModel::GRS80;     // Geodetic Reference System 1980
-
-// Get radius values
-$radiusKm = EarthModel::WGS84->getRadiusKm();     // 6371.0088
-$radiusMiles = EarthModel::WGS84->getRadiusMiles(); // 3958.7613
-
-// Get radius for specific distance unit
-$radius = EarthModel::WGS84->getRadius(DistanceUnit::KILOMETERS);
-```
-
 ### Batch Distance Calculations
 
 ```php
