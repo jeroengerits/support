@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use JeroenGerits\Support\Cache\CacheFactory;
-use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
-use JeroenGerits\Support\Cache\Traits\HasCache;
-use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Enums\EarthModel;
 use JeroenGerits\Support\Coordinates\Exceptions\InvalidCoordinatesException;
@@ -19,7 +15,7 @@ use Stringable;
  *
  * This class provides immutable coordinate objects with high-performance distance
  * calculations using the Haversine formula. It supports multiple Earth models and
- * distance units with built-in caching for optimal performance.
+ * distance units.
  *
  * @example
  * ```php
@@ -30,15 +26,6 @@ use Stringable;
  */
 class Coordinates implements Equatable, Stringable
 {
-    use HasCache;
-
-    // Cache key prefixes for different trigonometric calculations
-    private const string RADIANS_CACHE_PREFIX = 'rad';
-
-    private const string SINE_CACHE_PREFIX = 'sin';
-
-    private const string COSINE_CACHE_PREFIX = 'cos';
-
     // Haversine formula constants
     private const float HAVERSINE_DIVISION_FACTOR = 2.0;
 
@@ -46,9 +33,6 @@ class Coordinates implements Equatable, Stringable
 
     // Distance calculation constants
     private const float ZERO_DISTANCE = 0.0;
-
-    /** @var CacheAdapter|null The static cache adapter for trigonometric calculations */
-    private static ?CacheAdapter $staticCache = null;
 
     /**
      * Create a new Coordinates instance.
@@ -87,27 +71,10 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Get the current cache adapter.
-     *
-     * @return CacheAdapter The cache adapter
-     */
-    public static function getCache(): CacheAdapter
-    {
-        if (! self::$staticCache instanceof CacheAdapter) {
-            self::$staticCache = CacheFactory::createArrayCache(
-                namespace: 'coordinates',
-                maxItems: 5000
-            );
-        }
-
-        return self::$staticCache;
-    }
-
-    /**
      * Calculate distances for multiple coordinate pairs in batch.
      *
      * This method efficiently processes multiple coordinate pairs at once,
-     * reusing cached calculations and Earth radius values for optimal performance.
+     * reusing Earth radius values for optimal performance.
      *
      * @param  array<array{Coordinates, Coordinates}> $coordinatePairs Array of coordinate pairs
      * @param  DistanceUnit                           $unit            The distance unit (default: KILOMETERS)
@@ -129,7 +96,7 @@ class Coordinates implements Equatable, Stringable
         EarthModel $earthModel = EarthModel::WGS84
     ): array {
         $distances = [];
-        $earthRadius = self::getCachedEarthRadius($unit, $earthModel);
+        $earthRadius = self::getEarthRadius($unit, $earthModel);
 
         foreach ($coordinatePairs as [$source, $target]) {
             $distances[] = self::calculateDistanceBetween($source, $target, $earthRadius);
@@ -139,26 +106,15 @@ class Coordinates implements Equatable, Stringable
     }
 
     /**
-     * Get the Earth radius for the specified unit and model with caching.
+     * Get the Earth radius for the specified unit and model.
      *
      * @param  DistanceUnit $unit       The distance unit
      * @param  EarthModel   $earthModel The Earth model to use
      * @return float        The Earth radius in the specified unit
      */
-    private static function getCachedEarthRadius(DistanceUnit $unit, EarthModel $earthModel): float
+    private static function getEarthRadius(DistanceUnit $unit, EarthModel $earthModel): float
     {
-        $cache = self::getCache();
-        $key = "earth_radius_{$earthModel->value}_{$unit->value}";
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $radius = $earthModel->getRadius($unit);
-        $cache->set($key, $radius, TimeToLive::fromDays(30)->seconds); // Earth radius never changes
-
-        return $radius;
+        return $earthModel->getRadius($unit);
     }
 
     /**
@@ -228,33 +184,22 @@ class Coordinates implements Equatable, Stringable
     private static function convertCoordinatesToRadians(Coordinates $source, Coordinates $target): array
     {
         return [
-            'lat1' => self::getCachedRadians($source->latitude->value),
-            'lon1' => self::getCachedRadians($source->longitude->value),
-            'lat2' => self::getCachedRadians($target->latitude->value),
-            'lon2' => self::getCachedRadians($target->longitude->value),
+            'lat1' => self::getRadians($source->latitude->value),
+            'lon1' => self::getRadians($source->longitude->value),
+            'lat2' => self::getRadians($target->latitude->value),
+            'lon2' => self::getRadians($target->longitude->value),
         ];
     }
 
     /**
-     * Get the radians value for degrees with caching.
+     * Get the radians value for degrees.
      *
      * @param  float $degrees The degrees value to convert to radians
      * @return float The radians value
      */
-    private static function getCachedRadians(float $degrees): float
+    private static function getRadians(float $degrees): float
     {
-        $cache = self::getCache();
-        $key = self::RADIANS_CACHE_PREFIX.'_'.$degrees;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $radians = deg2rad($degrees);
-        $cache->set($key, $radians, TimeToLive::fromHours(24)->seconds);
-
-        return $radians;
+        return deg2rad($degrees);
     }
 
     /**
@@ -281,55 +226,33 @@ class Coordinates implements Equatable, Stringable
     private static function calculateTrigonometricValues(array $radians, array $differences): array
     {
         return [
-            'sinDlat' => self::getCachedSin($differences['dlat'] / self::HAVERSINE_DIVISION_FACTOR),
-            'sinDlon' => self::getCachedSin($differences['dlon'] / self::HAVERSINE_DIVISION_FACTOR),
-            'cosLat1' => self::getCachedCos($radians['lat1']),
-            'cosLat2' => self::getCachedCos($radians['lat2']),
+            'sinDlat' => self::getSin($differences['dlat'] / self::HAVERSINE_DIVISION_FACTOR),
+            'sinDlon' => self::getSin($differences['dlon'] / self::HAVERSINE_DIVISION_FACTOR),
+            'cosLat1' => self::getCos($radians['lat1']),
+            'cosLat2' => self::getCos($radians['lat2']),
         ];
     }
 
     /**
-     * Get the sine value for radians with caching.
+     * Get the sine value for radians.
      *
      * @param  float $radians The radians value to calculate sine for
      * @return float The sine value
      */
-    private static function getCachedSin(float $radians): float
+    private static function getSin(float $radians): float
     {
-        $cache = self::getCache();
-        $key = self::SINE_CACHE_PREFIX.'_'.$radians;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $sine = sin($radians);
-        $cache->set($key, $sine, TimeToLive::fromHours(24)->seconds);
-
-        return $sine;
+        return sin($radians);
     }
 
     /**
-     * Get the cosine value for radians with caching.
+     * Get the cosine value for radians.
      *
      * @param  float $radians The radians value to calculate cosine for
      * @return float The cosine value
      */
-    private static function getCachedCos(float $radians): float
+    private static function getCos(float $radians): float
     {
-        $cache = self::getCache();
-        $key = self::COSINE_CACHE_PREFIX.'_'.$radians;
-
-        $cached = $cache->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $cosine = cos($radians);
-        $cache->set($key, $cosine, TimeToLive::fromHours(24)->seconds);
-
-        return $cosine;
+        return cos($radians);
     }
 
     /**
@@ -361,8 +284,7 @@ class Coordinates implements Equatable, Stringable
      * Calculate the distance to another set of coordinates.
      *
      * Uses the Haversine formula to calculate the great-circle distance
-     * between two points on Earth. The calculation is optimized with
-     * caching for repeated calculations.
+     * between two points on Earth.
      *
      * @param  Coordinates  $target     The target coordinates
      * @param  DistanceUnit $unit       The unit of distance to return (default: KILOMETERS)
@@ -385,61 +307,8 @@ class Coordinates implements Equatable, Stringable
             return self::ZERO_DISTANCE;
         }
 
-        $earthRadius = self::getCachedEarthRadius($unit, $earthModel);
+        $earthRadius = self::getEarthRadius($unit, $earthModel);
 
         return self::calculateDistanceBetween($this, $target, $earthRadius);
-    }
-
-    /**
-     * Get cached metadata for this coordinate (demonstrates trait usage).
-     *
-     * This method demonstrates how to use the HasCache trait for instance-level
-     * caching of expensive calculations or metadata.
-     *
-     * @return array<string, mixed> Coordinate metadata
-     */
-    public function getCachedMetadata(): array
-    {
-        $this->initializeInstanceCache();
-
-        return $this->cacheRemember(
-            'metadata_'.$this->latitude->value.'_'.$this->longitude->value,
-            function (): array {
-                // Simulate expensive calculation
-                return [
-                    'latitude' => $this->latitude->value,
-                    'longitude' => $this->longitude->value,
-                    'string_representation' => (string) $this,
-                    'computed_at' => time(),
-                    'hash' => md5($this->latitude->value.$this->longitude->value),
-                ];
-            }
-        );
-    }
-
-    /**
-     * Initialize the cache for this instance.
-     *
-     * This method sets up the cache configuration for instance-level caching.
-     * It's called automatically when needed.
-     */
-    private function initializeInstanceCache(): void
-    {
-        if (! $this->isCacheEnabled()) {
-            $cache = self::getCache();
-            $this->setCache($cache);
-            $this->setCacheNamespace('coordinates_instance');
-            $this->setCacheDefaultTtl(TimeToLive::fromHours(24)->seconds);
-        }
-    }
-
-    /**
-     * Set a custom cache adapter (useful for testing).
-     *
-     * @param CacheAdapter|null $cache The cache adapter to use
-     */
-    public static function setCache(?CacheAdapter $cache): void
-    {
-        self::$staticCache = $cache;
     }
 }
