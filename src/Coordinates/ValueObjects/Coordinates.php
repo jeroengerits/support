@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use JeroenGerits\Support\Contract\Equatable;
+use JeroenGerits\Support\Contracts\Equatable;
+use Stringable;
 
-class Coordinates implements \Stringable, Equatable
+class Coordinates implements Stringable, Equatable
 {
     /**
      * Create a new Coordinates instance.

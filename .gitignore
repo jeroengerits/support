@@ -2,3 +2,6 @@
 /.rector-cache/
 /.idea/
 /logs/
+/coverage/
+/examples/
+coverage.xml

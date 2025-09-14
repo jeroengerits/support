@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use Exception;
-use JeroenGerits\Support\Contract\Equatable;
+use JeroenGerits\Support\Contracts\Equatable;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLongitudeException;
+use Stringable;
 
-class Longitude implements \Stringable, Equatable
+class Longitude implements Stringable, Equatable
 {
     /**
-     * @throws Exception
+     * @throws InvalidLongitudeException
      */
     public function __construct(public float $value)
     {
         if ($value < -180.0 || $value > 180.0) {
-            throw new Exception('Longitude must be between -180 and 180');
+            throw new InvalidLongitudeException('Longitude must be between -180 and 180');
         }
     }
 

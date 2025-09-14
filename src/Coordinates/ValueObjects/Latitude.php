@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
-use Exception;
-use JeroenGerits\Support\Contract\Equatable;
+use JeroenGerits\Support\Contracts\Equatable;
+use JeroenGerits\Support\Coordinates\Exceptions\InvalidLatitudeException;
+use Stringable;
 
-class Latitude implements \Stringable, Equatable
+class Latitude implements Stringable, Equatable
 {
     /**
-     * @throws Exception
+     * @throws InvalidLatitudeException
      */
     public function __construct(public float $value)
     {
         if ($value < -90.0 || $value > 90.0) {
-            throw new Exception('Latitude must be between -90 and 90');
+            throw new InvalidLatitudeException('Latitude must be between -90 and 90');
         }
     }
 
