@@ -41,4 +41,9 @@ class Coordinates implements Equatable, Stringable
 
         return $this->longitude->isEqual($other->longitude) && $this->latitude->isEqual($other->latitude);
     }
+
+    public function distanceTo(float|int|string|array|Latitude|null $latitude = null, float|int|string|Longitude|null $longitude = null): float
+    {
+        return distanceBetweenCoordinates($this, coordinates($latitude, $longitude));
+    }
 }
