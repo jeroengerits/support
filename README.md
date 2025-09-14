@@ -8,6 +8,8 @@ Provides a robust system for handling geographic coordinates with proper validat
 
 ### Value Objects
 
+Provides `Latitude`, `Longitude` and `Coordinates` value objects for handling geographic coordinates. 
+
 ```php
 use JeroenGerits\Support\Coordinates\ValueObjects\Latitude;
 
