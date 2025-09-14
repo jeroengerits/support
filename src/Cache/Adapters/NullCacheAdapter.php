@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Cache\Adapters;
 
-use JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface;
-use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
+use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
 use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
 
 /**
  * Null cache adapter that performs no operations (useful for testing).
  */
-class NullCacheAdapter implements CacheAdapterInterface
+readonly class NullCacheAdapter implements CacheAdapter
 {
     public function __construct(
-        private readonly string $namespace = 'default'
+        private string $namespace = 'default'
     ) {
         $this->validate();
     }
@@ -120,9 +119,9 @@ class NullCacheAdapter implements CacheAdapterInterface
     /**
      * Get cache statistics (always returns empty stats).
      *
-     * @return CacheStatsInterface Empty cache statistics
+     * @return \JeroenGerits\Support\Cache\ValueObjects\CacheStats Empty cache statistics
      */
-    public function getStats(): CacheStatsInterface
+    public function getStats(): \JeroenGerits\Support\Cache\ValueObjects\CacheStats
     {
         return new CacheStats(
             hits: 0,

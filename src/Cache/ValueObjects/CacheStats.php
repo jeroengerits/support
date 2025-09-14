@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Cache\ValueObjects;
 
-use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
 use JeroenGerits\Support\Shared\Contracts\Equatable;
 
 /**
  * Value object representing cache statistics.
  */
-class CacheStats implements CacheStatsInterface, Equatable
+class CacheStats implements Equatable
 {
     public function __construct(
         public readonly int $hits,

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace JeroenGerits\Support\Cache\Adapters;
 
-use JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface;
-use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
+use DateInterval;
+use InvalidArgumentException;
+use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
+use JeroenGerits\Support\Cache\Exceptions\InvalidCacheKeyException;
 use JeroenGerits\Support\Cache\ValueObjects\CacheKey;
 use JeroenGerits\Support\Cache\ValueObjects\CacheStats;
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
@@ -13,7 +15,7 @@ use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 /**
  * In-memory array-based cache adapter with TTL support and LRU eviction.
  */
-class ArrayCacheAdapter implements CacheAdapterInterface
+class ArrayCacheAdapter implements CacheAdapter
 {
     /** @var array<string, array{value: mixed, expires: int}> */
     private array $cache = [];
@@ -35,6 +37,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
      * @param  string $key     The cache key
      * @param  mixed  $default Default value if key not found
      * @return mixed  The cached value or default
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -64,12 +69,14 @@ class ArrayCacheAdapter implements CacheAdapterInterface
     /**
      * Set a value in the cache.
      *
-     * @param  string                 $key   The cache key
-     * @param  mixed                  $value The value to cache
-     * @param  null|int|\DateInterval $ttl   Time to live
-     * @return bool                   True on success, false on failure
+     * @param  string                $key   The cache key
+     * @param  mixed                 $value The value to cache
+     * @param  null|int|DateInterval $ttl   Time to live
+     * @return bool                  True on success, false on failure
+     *
+     * @throws InvalidCacheKeyException
      */
-    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
     {
         $cacheKey = CacheKey::create($key, $this->namespace);
         $fullKey = (string) $cacheKey;
@@ -91,6 +98,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
      *
      * @param  string $key The cache key
      * @return bool   True if the key was deleted, false if not found
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
     public function delete(string $key): bool
     {
@@ -126,6 +136,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
      * @param  iterable $keys    Array of keys to retrieve
      * @param  mixed    $default Default value for missing keys
      * @return iterable Associative array of key => value pairs
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
@@ -141,11 +154,14 @@ class ArrayCacheAdapter implements CacheAdapterInterface
     /**
      * Set multiple values in the cache.
      *
-     * @param  iterable               $values Associative array of key => value pairs
-     * @param  null|int|\DateInterval $ttl    Time to live
-     * @return bool                   True on success, false on failure
+     * @param  iterable              $values Associative array of key => value pairs
+     * @param  null|int|DateInterval $ttl    Time to live
+     * @return bool                  True on success, false on failure
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
-    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
     {
         $success = true;
 
@@ -163,6 +179,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
      *
      * @param  iterable $keys Array of keys to delete
      * @return bool     True on success, false on failure
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
     public function deleteMultiple(iterable $keys): bool
     {
@@ -182,6 +201,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
      *
      * @param  string $key The cache key
      * @return bool   True if key exists and is not expired, false otherwise
+     *
+     * @throws InvalidCacheKeyException
+     * @throws InvalidCacheKeyException
      */
     public function has(string $key): bool
     {
@@ -191,9 +213,9 @@ class ArrayCacheAdapter implements CacheAdapterInterface
     /**
      * Get cache statistics.
      *
-     * @return CacheStatsInterface Current cache statistics
+     * @return CacheStats Current cache statistics
      */
-    public function getStats(): CacheStatsInterface
+    public function getStats(): CacheStats
     {
         return new CacheStats(
             hits: $this->hits,
@@ -227,16 +249,16 @@ class ArrayCacheAdapter implements CacheAdapterInterface
     /**
      * Calculate expiration timestamp from TTL.
      *
-     * @param  null|int|\DateInterval $ttl Time to live
-     * @return int                    Expiration timestamp
+     * @param  null|int|DateInterval $ttl Time to live
+     * @return int                   Expiration timestamp
      */
-    private function calculateExpiration(null|int|\DateInterval $ttl): int
+    private function calculateExpiration(null|int|DateInterval $ttl): int
     {
         if ($ttl === null) {
             return TimeToLive::default()->seconds + time();
         }
 
-        if ($ttl instanceof \DateInterval) {
+        if ($ttl instanceof DateInterval) {
             // Convert DateInterval to seconds manually
             $seconds = ($ttl->y * 365 * 24 * 3600) +
                       ($ttl->m * 30 * 24 * 3600) +
@@ -275,11 +297,11 @@ class ArrayCacheAdapter implements CacheAdapterInterface
     private function validate(): void
     {
         if ($this->namespace === '' || $this->namespace === '0') {
-            throw new \InvalidArgumentException('Cache namespace cannot be empty');
+            throw new InvalidArgumentException('Cache namespace cannot be empty');
         }
 
         if ($this->maxItems <= 0) {
-            throw new \InvalidArgumentException('Cache max items must be greater than 0');
+            throw new InvalidArgumentException('Cache max items must be greater than 0');
         }
     }
 }

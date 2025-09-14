@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace JeroenGerits\Support\Coordinates\ValueObjects;
 
 use JeroenGerits\Support\Cache\CacheFactory;
-use JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface;
-use JeroenGerits\Support\Cache\Contracts\CacheStatsInterface;
+use JeroenGerits\Support\Cache\Contracts\CacheAdapter;
 use JeroenGerits\Support\Cache\ValueObjects\TimeToLive;
 use JeroenGerits\Support\Coordinates\Enums\DistanceUnit;
 use JeroenGerits\Support\Coordinates\Enums\EarthModel;
@@ -45,8 +44,8 @@ class Coordinates implements Equatable, Stringable
     // Distance calculation constants
     private const float ZERO_DISTANCE = 0.0;
 
-    /** @var CacheAdapterInterface|null The cache adapter */
-    private static ?CacheAdapterInterface $cache = null;
+    /** @var CacheAdapter|null The cache adapter */
+    private static ?CacheAdapter $cache = null;
 
     /**
      * Create a new Coordinates instance.
@@ -87,9 +86,9 @@ class Coordinates implements Equatable, Stringable
     /**
      * Set a custom cache adapter (useful for testing).
      *
-     * @param CacheAdapterInterface|null $cache The cache adapter to use
+     * @param CacheAdapter|null $cache The cache adapter to use
      */
-    public static function setCache(?CacheAdapterInterface $cache): void
+    public static function setCache(?CacheAdapter $cache): void
     {
         self::$cache = $cache;
     }
@@ -109,11 +108,11 @@ class Coordinates implements Equatable, Stringable
     /**
      * Get the current cache adapter.
      *
-     * @return CacheAdapterInterface The cache adapter
+     * @return CacheAdapter The cache adapter
      */
-    private static function getCache(): CacheAdapterInterface
+    private static function getCache(): CacheAdapter
     {
-        if (! self::$cache instanceof \JeroenGerits\Support\Cache\Contracts\CacheAdapterInterface) {
+        if (! self::$cache instanceof \JeroenGerits\Support\Cache\Contracts\CacheAdapter) {
             self::$cache = CacheFactory::createArrayCache(
                 namespace: 'coordinates',
                 maxItems: 5000
@@ -126,9 +125,9 @@ class Coordinates implements Equatable, Stringable
     /**
      * Get cache statistics.
      *
-     * @return CacheStatsInterface Current cache statistics
+     * @return \JeroenGerits\Support\Cache\ValueObjects\CacheStats Current cache statistics
      */
-    public static function getCacheStats(): CacheStatsInterface
+    public static function getCacheStats(): \JeroenGerits\Support\Cache\ValueObjects\CacheStats
     {
         return self::getCache()->getStats();
     }
